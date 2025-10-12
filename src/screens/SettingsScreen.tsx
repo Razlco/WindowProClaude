@@ -9,6 +9,7 @@ import {
   Switch,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, DEFAULT_APP_SETTINGS } from '../constants';
 import StorageService from '../services/StorageService';
 
@@ -114,12 +115,13 @@ const SettingsScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={styles.wrapper}>
+    <SafeAreaView style={styles.wrapper} edges={['top']}>
       {/* Header with back button */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
@@ -198,7 +200,7 @@ const SettingsScreen = ({ navigation }: any) => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} activeOpacity={0.7}>
           <Text style={styles.buttonText}>Configure Pricing Rules</Text>
         </TouchableOpacity>
       </View>
@@ -278,6 +280,7 @@ const SettingsScreen = ({ navigation }: any) => {
             <TouchableOpacity
               onPress={handleDisconnectDevice}
               style={styles.disconnectButton}
+              activeOpacity={0.7}
             >
               <Text style={styles.disconnectButtonText}>Disconnect</Text>
             </TouchableOpacity>
@@ -308,6 +311,7 @@ const SettingsScreen = ({ navigation }: any) => {
                 key={device.id}
                 style={styles.availableDeviceCard}
                 onPress={() => handleConnectDevice(device.id, device.name)}
+                activeOpacity={0.7}
               >
                 <View style={[styles.deviceIcon, { backgroundColor: Colors.info }]}>
                   <Text style={styles.deviceIconText}>📏</Text>
@@ -326,6 +330,7 @@ const SettingsScreen = ({ navigation }: any) => {
           style={[styles.button, isScanning && styles.buttonDisabled]}
           onPress={handleScanDevices}
           disabled={isScanning || !!connectedDevice}
+          activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>
             {isScanning ? 'Scanning...' : connectedDevice ? 'Device Connected' : 'Scan for Devices'}
@@ -340,6 +345,7 @@ const SettingsScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={[styles.button, styles.buttonSecondary]}
           onPress={handleExportData}
+          activeOpacity={0.7}
         >
           <Text style={[styles.buttonText, styles.buttonTextSecondary]}>
             Export All Data
@@ -348,6 +354,7 @@ const SettingsScreen = ({ navigation }: any) => {
 
         <TouchableOpacity
           style={[styles.button, styles.buttonSecondary]}
+          activeOpacity={0.7}
         >
           <Text style={[styles.buttonText, styles.buttonTextSecondary]}>
             Backup to Cloud
@@ -357,6 +364,7 @@ const SettingsScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={[styles.button, styles.buttonDanger]}
           onPress={handleClearData}
+          activeOpacity={0.7}
         >
           <Text style={styles.buttonText}>Clear All Data</Text>
         </TouchableOpacity>
@@ -385,13 +393,14 @@ const SettingsScreen = ({ navigation }: any) => {
       <TouchableOpacity
         style={styles.saveButton}
         onPress={handleSaveSettings}
+        activeOpacity={0.7}
       >
         <Text style={styles.saveButtonText}>Save All Settings</Text>
       </TouchableOpacity>
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -414,8 +423,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },

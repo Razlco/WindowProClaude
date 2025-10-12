@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants';
 
 const HomeMainScreen = ({ navigation }: any) => {
@@ -73,7 +74,7 @@ const HomeMainScreen = ({ navigation }: any) => {
   ];
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header Section */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -98,6 +99,7 @@ const HomeMainScreen = ({ navigation }: any) => {
               // TODO: Backend developer - Implement notifications feature
               console.log('Notifications pressed');
             }}
+            activeOpacity={0.7}
           >
             <Text style={styles.iconButtonText}>🔔</Text>
           </TouchableOpacity>
@@ -106,6 +108,7 @@ const HomeMainScreen = ({ navigation }: any) => {
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.7}
           >
             <Text style={styles.iconButtonText}>⚙️</Text>
           </TouchableOpacity>
@@ -142,7 +145,7 @@ const HomeMainScreen = ({ navigation }: any) => {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

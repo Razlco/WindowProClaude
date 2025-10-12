@@ -9,6 +9,7 @@ import {
   Alert,
   FlatList,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, DEFAULT_MEASUREMENT } from '../constants';
 import {
   Measurement,
@@ -244,7 +245,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Customer</Text>
@@ -266,6 +267,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
               <TouchableOpacity
                 style={[styles.categoryCard, { borderColor: '#3B82F6' }]}
                 onPress={() => handleCategorySelect('WINDOW')}
+                activeOpacity={0.7}
               >
                 <View style={[styles.categoryIcon, { backgroundColor: '#3B82F6' + '20' }]}>
                   <Text style={[styles.categoryIconText, { color: '#3B82F6' }]}>🪟</Text>
@@ -281,6 +283,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
               <TouchableOpacity
                 style={[styles.categoryCard, { borderColor: '#F97316' }]}
                 onPress={() => handleCategorySelect('DOOR')}
+                activeOpacity={0.7}
               >
                 <View style={[styles.categoryIcon, { backgroundColor: '#F97316' + '20' }]}>
                   <Text style={[styles.categoryIconText, { color: '#F97316' }]}>🚪</Text>
@@ -296,6 +299,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
               <TouchableOpacity
                 style={[styles.categoryCard, { borderColor: '#10B981' }]}
                 onPress={() => handleCategorySelect('GLASS')}
+                activeOpacity={0.7}
               >
                 <View style={[styles.categoryIcon, { backgroundColor: '#10B981' + '20' }]}>
                   <Text style={[styles.categoryIconText, { color: '#10B981' }]}>◇</Text>
@@ -316,6 +320,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
               <TouchableOpacity
                 style={styles.removeButton}
                 onPress={() => handleRemoveMeasurement(measurement.id)}
+                activeOpacity={0.7}
               >
                 <Text style={styles.removeButtonText}>Remove</Text>
               </TouchableOpacity>
@@ -353,6 +358,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
               {/* Bluetooth Measurement Button */}
               <TouchableOpacity
                 style={styles.bluetoothButton}
+                activeOpacity={0.7}
                 onPress={() => {
                   // TODO: Backend developer - Read measurement from connected Bluetooth device
                   // Use BluetoothService to read width and height from Bosch GLM or Leica DISTO
@@ -407,6 +413,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                         productType === type && styles.chipSelected,
                       ]}
                       onPress={() => setProductType(type)}
+                      activeOpacity={0.7}
                     >
                       <Text
                         style={[
@@ -432,6 +439,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                         glassType === type && styles.chipSelected,
                       ]}
                       onPress={() => setGlassType(type)}
+                      activeOpacity={0.7}
                     >
                       <Text
                         style={[
@@ -452,6 +460,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                   <TouchableOpacity
                     style={[styles.chip, !frameType && styles.chipSelected]}
                     onPress={() => setFrameType(undefined)}
+                    activeOpacity={0.7}
                   >
                     <Text
                       style={[
@@ -470,6 +479,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                         frameType === type && styles.chipSelected,
                       ]}
                       onPress={() => setFrameType(type)}
+                      activeOpacity={0.7}
                     >
                       <Text
                         style={[
@@ -495,6 +505,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                         hingePlacement === 'LEFT' && styles.chipSelected,
                       ]}
                       onPress={() => setHingePlacement('LEFT')}
+                      activeOpacity={0.7}
                     >
                       <Text
                         style={[
@@ -511,6 +522,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                         hingePlacement === 'RIGHT' && styles.chipSelected,
                       ]}
                       onPress={() => setHingePlacement('RIGHT')}
+                      activeOpacity={0.7}
                     >
                       <Text
                         style={[
@@ -547,6 +559,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                     setShowCategorySelection(true);
                     setSelectedCategory(null);
                   }}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.cancelButtonText}>Back</Text>
                 </TouchableOpacity>
@@ -554,6 +567,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                 <TouchableOpacity
                   style={[styles.button, styles.addMeasurementButton]}
                   onPress={handleAddMeasurement}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.addMeasurementButtonText}>Add Measurement</Text>
                 </TouchableOpacity>
@@ -571,6 +585,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
             style={[styles.saveButton, saving && styles.saveButtonDisabled]}
             onPress={handleSaveJob}
             disabled={saving}
+            activeOpacity={0.7}
           >
             <Text style={styles.saveButtonText}>
               {saving ? 'Saving...' : 'Save Job'}
@@ -578,7 +593,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 

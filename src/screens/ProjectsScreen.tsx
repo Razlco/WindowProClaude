@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { Colors } from '../constants';
 import { Job, JobStatus, WorkflowStatus } from '../types';
@@ -361,12 +362,13 @@ const ProjectsScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
@@ -375,12 +377,14 @@ const ProjectsScreen = ({ navigation }: any) => {
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => setGroupByStatus(!groupByStatus)}
+            activeOpacity={0.7}
           >
             <Text style={styles.viewModeIcon}>{groupByStatus ? '▤' : '▥'}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => setViewMode(prev => prev === 'compact' ? 'detailed' : 'compact')}
+            activeOpacity={0.7}
           >
             <Text style={styles.viewModeIcon}>{viewMode === 'compact' ? '▦' : '☰'}</Text>
           </TouchableOpacity>
@@ -402,6 +406,7 @@ const ProjectsScreen = ({ navigation }: any) => {
           <TouchableOpacity
             onPress={() => setSearchQuery('')}
             style={styles.clearButton}
+            activeOpacity={0.7}
           >
             <Text style={styles.clearButtonText}>✕</Text>
           </TouchableOpacity>
@@ -413,30 +418,35 @@ const ProjectsScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={[styles.quickFilterButton, quickFilter === 'all' && styles.quickFilterButtonActive]}
           onPress={() => setQuickFilter('all')}
+          activeOpacity={0.7}
         >
           <Text style={[styles.quickFilterText, quickFilter === 'all' && styles.quickFilterTextActive]}>All</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.quickFilterButton, quickFilter === 'dueToday' && styles.quickFilterButtonActive]}
           onPress={() => setQuickFilter('dueToday')}
+          activeOpacity={0.7}
         >
           <Text style={[styles.quickFilterText, quickFilter === 'dueToday' && styles.quickFilterTextActive]}>📅 Due Today</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.quickFilterButton, quickFilter === 'followUpsWeek' && styles.quickFilterButtonActive]}
           onPress={() => setQuickFilter('followUpsWeek')}
+          activeOpacity={0.7}
         >
           <Text style={[styles.quickFilterText, quickFilter === 'followUpsWeek' && styles.quickFilterTextActive]}>🔔 Follow-ups</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.quickFilterButton, quickFilter === 'materialsNeeded' && styles.quickFilterButtonActive]}
           onPress={() => setQuickFilter('materialsNeeded')}
+          activeOpacity={0.7}
         >
           <Text style={[styles.quickFilterText, quickFilter === 'materialsNeeded' && styles.quickFilterTextActive]}>📦 Materials</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.quickFilterButton, quickFilter === 'readyToInstall' && styles.quickFilterButtonActive]}
           onPress={() => setQuickFilter('readyToInstall')}
+          activeOpacity={0.7}
         >
           <Text style={[styles.quickFilterText, quickFilter === 'readyToInstall' && styles.quickFilterTextActive]}>🔨 Ready</Text>
         </TouchableOpacity>
@@ -447,6 +457,7 @@ const ProjectsScreen = ({ navigation }: any) => {
         <TouchableOpacity
           style={[styles.filterChip, activeFilter === 'all' && styles.filterChipActive]}
           onPress={() => setActiveFilter('all')}
+          activeOpacity={0.7}
         >
           <Text style={[styles.filterChipText, activeFilter === 'all' && styles.filterChipTextActive]}>
             All ({statusCounts.all})
@@ -457,6 +468,7 @@ const ProjectsScreen = ({ navigation }: any) => {
             key={status}
             style={[styles.filterChip, activeFilter === status && styles.filterChipActive]}
             onPress={() => setActiveFilter(status)}
+            activeOpacity={0.7}
           >
             <Text style={[styles.filterChipText, activeFilter === status && styles.filterChipTextActive]}>
               {status} ({statusCounts[status]})
@@ -527,6 +539,7 @@ const ProjectsScreen = ({ navigation }: any) => {
                     <TouchableOpacity
                       style={styles.loadMoreButton}
                       onPress={() => setDisplayLimit(prev => prev + 20)}
+                      activeOpacity={0.7}
                     >
                       <Text style={styles.loadMoreText}>Load More ({jobs.length - displayLimit} remaining)</Text>
                     </TouchableOpacity>
@@ -549,6 +562,7 @@ const ProjectsScreen = ({ navigation }: any) => {
               <TouchableOpacity
                 style={styles.loadMoreButton}
                 onPress={() => setDisplayLimit(prev => prev + 20)}
+                activeOpacity={0.7}
               >
                 <Text style={styles.loadMoreText}>Load More ({filteredJobs.length - displayLimit} remaining)</Text>
               </TouchableOpacity>
@@ -570,7 +584,7 @@ const ProjectsScreen = ({ navigation }: any) => {
           setPendingWorkflowStatus(null);
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -593,8 +607,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -615,8 +629,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },

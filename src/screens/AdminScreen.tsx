@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants';
 import { useJobStorage } from '../hooks';
 import { formatCurrency } from '../utils';
@@ -54,7 +55,8 @@ const AdminScreen = ({ navigation }: any) => {
   }, [jobs]);
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView style={styles.scrollView}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Dashboard</Text>
@@ -207,6 +209,7 @@ const AdminScreen = ({ navigation }: any) => {
             key={job.id}
             style={styles.jobRow}
             onPress={() => navigation.navigate('JobDetails', { jobId: job.id })}
+            activeOpacity={0.7}
           >
             <View style={styles.jobInfo}>
               <Text style={styles.jobNumber}>{job.jobNumber}</Text>
@@ -225,21 +228,22 @@ const AdminScreen = ({ navigation }: any) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Quick Actions</Text>
 
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
           <Text style={styles.actionButtonText}>Export Financial Report</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
           <Text style={styles.actionButtonText}>Generate Monthly Summary</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
           <Text style={styles.actionButtonText}>View All Customers</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.actionButton, styles.actionButtonSecondary]}
           onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.7}
         >
           <Text style={[styles.actionButtonText, styles.actionButtonTextSecondary]}>
             App Settings
@@ -248,7 +252,8 @@ const AdminScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.bottomSpacer} />
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -256,6 +261,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundGray,
+  },
+  scrollView: {
+    flex: 1,
   },
   header: {
     backgroundColor: Colors.primary,

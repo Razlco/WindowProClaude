@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants';
 
 const LandingScreen = ({ navigation }: any) => {
@@ -86,7 +87,8 @@ const LandingScreen = ({ navigation }: any) => {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView style={styles.scrollView}>
       {/* Hero Section */}
       <View style={styles.hero}>
         <Text style={styles.heroTitle}>Window Pro</Text>
@@ -94,7 +96,7 @@ const LandingScreen = ({ navigation }: any) => {
           Professional window and glass measurement and quoting system.
           Create detailed estimates, generate PDF quotes, and manage projects from anywhere.
         </Text>
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.7}>
           <Text style={styles.loginButtonText}>Sign In to Get Started</Text>
         </TouchableOpacity>
       </View>
@@ -123,13 +125,14 @@ const LandingScreen = ({ navigation }: any) => {
         <Text style={styles.ctaSubtitle}>
           Join professionals who trust Window Pro for their estimation needs.
         </Text>
-        <TouchableOpacity style={styles.ctaButton} onPress={handleLogin}>
+        <TouchableOpacity style={styles.ctaButton} onPress={handleLogin} activeOpacity={0.7}>
           <Text style={styles.ctaButtonText}>Get Started Today</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.bottomSpacer} />
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -137,6 +140,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#EEF2FF',
+  },
+  scrollView: {
+    flex: 1,
   },
   hero: {
     paddingHorizontal: 20,

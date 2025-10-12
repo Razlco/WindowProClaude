@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants';
 import { Customer } from '../types';
 import { generateCustomerId } from '../utils';
@@ -79,7 +80,8 @@ const NewJobScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView style={styles.scrollView}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Customer Information</Text>
 
@@ -189,6 +191,7 @@ const NewJobScreen = ({ navigation, route }: any) => {
       <TouchableOpacity
         style={styles.continueButton}
         onPress={handleContinueToMeasurements}
+        activeOpacity={0.7}
       >
         <Text style={styles.continueButtonText}>
           Continue to Measurements
@@ -196,7 +199,8 @@ const NewJobScreen = ({ navigation, route }: any) => {
       </TouchableOpacity>
 
       <View style={styles.bottomSpacer} />
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -204,6 +208,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundGray,
+  },
+  scrollView: {
+    flex: 1,
   },
   section: {
     backgroundColor: Colors.background,

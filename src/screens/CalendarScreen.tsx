@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
 import { Colors } from '../constants';
 import { useJobStorage } from '../hooks';
@@ -104,12 +105,13 @@ const CalendarScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header with back button */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
@@ -180,6 +182,7 @@ const CalendarScreen = ({ navigation }: any) => {
               key={`${event.job.id}-${event.type}-${index}`}
               style={styles.eventCard}
               onPress={() => handleJobPress(event.job.id)}
+              activeOpacity={0.7}
             >
               <View style={[styles.eventIndicator, { backgroundColor: event.color }]} />
 
@@ -266,7 +269,7 @@ const CalendarScreen = ({ navigation }: any) => {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -289,8 +292,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -416,7 +419,7 @@ const styles = StyleSheet.create({
   },
   workflowText: {
     color: Colors.background,
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
@@ -427,7 +430,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: Colors.background,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
   },
   customerName: {

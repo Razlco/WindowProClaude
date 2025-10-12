@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   compactStatusText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
@@ -283,10 +283,10 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   compactWorkflowIcon: {
-    fontSize: 10,
+    fontSize: 12,
   },
   compactWorkflowText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '600',
   },
   compactCustomerName: {
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   compactDate: {
-    fontSize: 11,
+    fontSize: 12,
     color: Colors.textSecondary,
   },
 

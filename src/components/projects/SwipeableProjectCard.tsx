@@ -78,13 +78,13 @@ const SwipeableProjectCard = memo(
       return (
         <View style={styles.leftActions}>
           <Animated.View style={[styles.actionButton, styles.callAction, { transform: [{ translateX: trans }] }]}>
-            <TouchableOpacity onPress={handleCall} style={styles.actionTouchable}>
+            <TouchableOpacity onPress={handleCall} style={styles.actionTouchable} activeOpacity={0.7}>
               <Text style={styles.actionIcon}>📞</Text>
               <Text style={styles.actionText}>Call</Text>
             </TouchableOpacity>
           </Animated.View>
           <Animated.View style={[styles.actionButton, styles.smsAction, { transform: [{ translateX: trans }] }]}>
-            <TouchableOpacity onPress={handleSMS} style={styles.actionTouchable}>
+            <TouchableOpacity onPress={handleSMS} style={styles.actionTouchable} activeOpacity={0.7}>
               <Text style={styles.actionIcon}>💬</Text>
               <Text style={styles.actionText}>Text</Text>
             </TouchableOpacity>
@@ -105,7 +105,7 @@ const SwipeableProjectCard = memo(
       return (
         <View style={styles.rightActions}>
           <Animated.View style={[styles.actionButton, styles.emailAction, { transform: [{ translateX: trans }] }]}>
-            <TouchableOpacity onPress={handleEmail} style={styles.actionTouchable}>
+            <TouchableOpacity onPress={handleEmail} style={styles.actionTouchable} activeOpacity={0.7}>
               <Text style={styles.actionIcon}>📧</Text>
               <Text style={styles.actionText}>Email</Text>
             </TouchableOpacity>

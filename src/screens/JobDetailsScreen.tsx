@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MeasurementCard } from '../components';
 import { Colors } from '../constants';
 import { formatDisplayDate, formatCurrency } from '../utils';
@@ -74,7 +75,8 @@ const JobDetailsScreen = ({ route, navigation }: any) => {
   }[job.status] || Colors.text;
 
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView style={styles.scrollView}>
       {/* Job Header */}
       <View style={styles.header}>
         <View style={styles.headerRow}>
@@ -193,13 +195,14 @@ const JobDetailsScreen = ({ route, navigation }: any) => {
 
       {/* Actions */}
       <View style={styles.section}>
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteJob}>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteJob} activeOpacity={0.7}>
           <Text style={styles.deleteButtonText}>Delete Job</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.bottomSpacer} />
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -207,6 +210,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundGray,
+  },
+  scrollView: {
+    flex: 1,
   },
   centered: {
     flex: 1,

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants';
 
 const ConverterScreen = ({ navigation }: any) => {
@@ -127,12 +128,13 @@ const ConverterScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Text style={styles.backButtonText}>‹</Text>
         </TouchableOpacity>
@@ -186,6 +188,7 @@ const ConverterScreen = ({ navigation }: any) => {
                 key={index}
                 style={styles.quickRefButton}
                 onPress={() => handleQuickFraction(frac.value)}
+                activeOpacity={0.7}
               >
                 <Text style={styles.quickRefText}>{frac.label}</Text>
               </TouchableOpacity>
@@ -269,7 +272,7 @@ const ConverterScreen = ({ navigation }: any) => {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -292,8 +295,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
