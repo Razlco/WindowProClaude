@@ -10,9 +10,11 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { Colors } from '../constants';
 import { Lead, LeadStatus } from '../types';
 import StorageService from '../services/StorageService';
+import { LeadCardSkeleton } from '../components/shared';
 
 const LeadsScreen = ({ navigation }: any) => {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -26,6 +28,7 @@ const LeadsScreen = ({ navigation }: any) => {
   const [newLeadAddress, setNewLeadAddress] = useState('');
   const [newLeadInterest, setNewLeadInterest] = useState('');
   const [newLeadNotes, setNewLeadNotes] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     loadLeads();
@@ -59,19 +62,26 @@ const LeadsScreen = ({ navigation }: any) => {
     setNewLeadAddress('');
     setNewLeadInterest('');
     setNewLeadNotes('');
+    setErrors({});
   };
 
   const handleAddLead = async () => {
+    const newErrors: Record<string, string> = {};
+
     if (!newLeadName.trim()) {
-      Alert.alert('Validation Error', 'Lead name is required');
-      return;
+      newErrors.name = 'Lead name is required';
     }
     if (!newLeadPhone.trim()) {
-      Alert.alert('Validation Error', 'Phone number is required');
-      return;
+      newErrors.phone = 'Phone number is required';
     }
     if (!newLeadInterest.trim()) {
-      Alert.alert('Validation Error', 'Interest/Service is required');
+      newErrors.interest = 'Interest/Service is required';
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
 
@@ -90,17 +100,21 @@ const LeadsScreen = ({ navigation }: any) => {
 
     try {
       await StorageService.saveLead(newLead);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setShowAddModal(false);
       resetForm();
       loadLeads();
       Alert.alert('Success', 'Lead added successfully');
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error('Error saving lead:', error);
       Alert.alert('Error', 'Failed to save lead');
     }
   };
 
   const handleFollowUp = async (lead: Lead) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     const updatedLead = {
       ...lead,
       status: LeadStatus.FOLLOW_UP,
@@ -109,15 +123,19 @@ const LeadsScreen = ({ navigation }: any) => {
 
     try {
       await StorageService.saveLead(updatedLead);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       loadLeads();
       Alert.alert('Success', `${lead.name} marked for follow-up`);
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       console.error('Error updating lead:', error);
       Alert.alert('Error', 'Failed to update lead');
     }
   };
 
   const handleScheduleEstimate = async (lead: Lead) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
     Alert.alert(
       'Schedule Estimate',
       `Convert ${lead.name} to an estimate?`,
@@ -126,6 +144,7 @@ const LeadsScreen = ({ navigation }: any) => {
         {
           text: 'Create Estimate',
           onPress: () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             // Navigate to NewJob with pre-filled customer data
             navigation.navigate('NewJob', {
               category: lead.interest,
@@ -226,9 +245,11 @@ const LeadsScreen = ({ navigation }: any) => {
       {/* Leads List */}
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {loading ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>Loading leads...</Text>
-          </View>
+          <>
+            {[1, 2, 3, 4].map((item) => (
+              <LeadCardSkeleton key={item} />
+            ))}
+          </>
         ) : leads.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateIcon}>👥</Text>
@@ -330,22 +351,30 @@ const LeadsScreen = ({ navigation }: any) => {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Name *</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.name && styles.inputError]}
                   value={newLeadName}
-                  onChangeText={setNewLeadName}
+                  onChangeText={(value) => {
+                    setNewLeadName(value);
+                    if (errors.name) setErrors((prev) => ({ ...prev, name: '' }));
+                  }}
                   placeholder="Customer name"
                 />
+                {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Phone *</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.phone && styles.inputError]}
                   value={newLeadPhone}
-                  onChangeText={setNewLeadPhone}
+                  onChangeText={(value) => {
+                    setNewLeadPhone(value);
+                    if (errors.phone) setErrors((prev) => ({ ...prev, phone: '' }));
+                  }}
                   placeholder="(555) 123-4567"
                   keyboardType="phone-pad"
                 />
+                {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
               </View>
 
               <View style={styles.inputGroup}>
@@ -373,11 +402,15 @@ const LeadsScreen = ({ navigation }: any) => {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Interested In *</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, errors.interest && styles.inputError]}
                   value={newLeadInterest}
-                  onChangeText={setNewLeadInterest}
+                  onChangeText={(value) => {
+                    setNewLeadInterest(value);
+                    if (errors.interest) setErrors((prev) => ({ ...prev, interest: '' }));
+                  }}
                   placeholder="Windows, Glass, Doors, etc."
                 />
+                {errors.interest && <Text style={styles.errorText}>{errors.interest}</Text>}
               </View>
 
               <View style={styles.inputGroup}>
@@ -710,6 +743,15 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     color: Colors.text,
+  },
+  inputError: {
+    borderColor: Colors.error,
+    borderWidth: 2,
+  },
+  errorText: {
+    color: Colors.error,
+    fontSize: 12,
+    marginTop: 4,
   },
   textArea: {
     height: 100,

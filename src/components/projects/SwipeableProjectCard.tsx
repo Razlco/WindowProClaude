@@ -1,6 +1,7 @@
 import React, { memo, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Linking, Alert } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import * as Haptics from 'expo-haptics';
 import { Colors } from '../../constants';
 import { Job } from '../../types';
 import ProjectCard from './ProjectCard';
@@ -28,6 +29,7 @@ const SwipeableProjectCard = memo(
     const swipeableRef = useRef<Swipeable>(null);
 
     const handleCall = () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       swipeableRef.current?.close();
       if (onCallPress) {
         onCallPress(job);
@@ -41,6 +43,7 @@ const SwipeableProjectCard = memo(
     };
 
     const handleEmail = () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       swipeableRef.current?.close();
       if (onEmailPress) {
         onEmailPress(job);
@@ -58,6 +61,7 @@ const SwipeableProjectCard = memo(
     };
 
     const handleSMS = () => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       swipeableRef.current?.close();
       // TODO: Backend developer - Implement SMS functionality
       const phoneNumber = job.customer.phone.replace(/[^0-9]/g, '');

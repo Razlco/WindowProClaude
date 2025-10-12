@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { Colors, DEFAULT_APP_SETTINGS } from '../constants';
 import StorageService from '../services/StorageService';
 
@@ -32,6 +33,7 @@ const SettingsScreen = ({ navigation }: any) => {
   const [availableDevices, setAvailableDevices] = useState<Array<{id: string, name: string}>>([]);
 
   const handleSaveSettings = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     Alert.alert('Success', 'Settings saved successfully');
   };
 

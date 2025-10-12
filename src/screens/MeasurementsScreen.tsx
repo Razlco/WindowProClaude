@@ -12,6 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { Colors, DEFAULT_MEASUREMENT } from '../constants';
 import {
   Measurement,
@@ -66,6 +67,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
   };
 
   const handleCategorySelect = (category: 'WINDOW' | 'DOOR' | 'GLASS') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedCategory(category);
     setShowCategorySelection(false);
     setShowForm(true);
@@ -100,16 +102,19 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     const quantityNum = parseInt(quantity, 10);
 
     if (!width || isNaN(widthNum) || widthNum <= 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Validation Error', 'Please enter a valid width');
       return;
     }
 
     if (!height || isNaN(heightNum) || heightNum <= 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Validation Error', 'Please enter a valid height');
       return;
     }
 
     if (!quantity || isNaN(quantityNum) || quantityNum <= 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Validation Error', 'Please enter a valid quantity');
       return;
     }
@@ -151,6 +156,8 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     quantityNum: number,
     overrideGlassType?: GlassType
   ) => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
     const newMeasurement: Measurement = {
       id: generateMeasurementId(),
       width: widthNum,
@@ -190,17 +197,20 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
 
   const handleSaveJob = async () => {
     if (!customer) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Error', 'Customer information is missing');
       return;
     }
 
     if (measurements.length === 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Error', 'Please add at least one measurement');
       return;
     }
 
     try {
       setSaving(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       const pricing = calculateJobPricing(measurements);
       const existingJobNumbers = jobs.map((j) => j.jobNumber);
@@ -219,6 +229,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
 
       await saveJob(newJob);
 
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert('Success', 'Job saved successfully!', [
         {
           text: 'OK',
@@ -231,6 +242,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
         },
       ]);
     } catch (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Error', 'Failed to save job. Please try again.');
       console.error('Save job error:', error);
     } finally {

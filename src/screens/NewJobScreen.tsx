@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { Colors } from '../constants';
 import { Customer } from '../types';
 import { generateCustomerId } from '../utils';
@@ -29,36 +30,46 @@ const NewJobScreen = ({ navigation, route }: any) => {
     notes: jobData?.customer?.notes || '',
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const handleInputChange = (field: keyof Customer, value: string) => {
     setCustomerData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
   };
 
   const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
     if (!customerData.name?.trim()) {
-      Alert.alert('Validation Error', 'Customer name is required');
-      return false;
+      newErrors.name = 'Customer name is required';
     }
     if (!customerData.phone?.trim()) {
-      Alert.alert('Validation Error', 'Phone number is required');
-      return false;
+      newErrors.phone = 'Phone number is required';
     }
     if (!customerData.address?.trim()) {
-      Alert.alert('Validation Error', 'Address is required');
-      return false;
+      newErrors.address = 'Address is required';
     }
     if (!customerData.city?.trim()) {
-      Alert.alert('Validation Error', 'City is required');
-      return false;
+      newErrors.city = 'City is required';
     }
     if (!customerData.state?.trim()) {
-      Alert.alert('Validation Error', 'State is required');
-      return false;
+      newErrors.state = 'State is required';
     }
-    return true;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleContinueToMeasurements = () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     const customer: Customer = {
       id: jobData?.customer?.id || generateCustomerId(),
@@ -96,11 +107,12 @@ const NewJobScreen = ({ navigation, route }: any) => {
             Name <Text style={styles.required}>*</Text>
           </Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, errors.name && styles.inputError]}
             placeholder="John Doe"
             value={customerData.name}
             onChangeText={(value) => handleInputChange('name', value)}
           />
+          {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
         </View>
 
         <View style={styles.inputGroup}>
@@ -108,12 +120,13 @@ const NewJobScreen = ({ navigation, route }: any) => {
             Phone <Text style={styles.required}>*</Text>
           </Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, errors.phone && styles.inputError]}
             placeholder="(555) 123-4567"
             value={customerData.phone}
             onChangeText={(value) => handleInputChange('phone', value)}
             keyboardType="phone-pad"
           />
+          {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
         </View>
 
         <View style={styles.inputGroup}>
@@ -133,11 +146,12 @@ const NewJobScreen = ({ navigation, route }: any) => {
             Address <Text style={styles.required}>*</Text>
           </Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, errors.address && styles.inputError]}
             placeholder="123 Main Street"
             value={customerData.address}
             onChangeText={(value) => handleInputChange('address', value)}
           />
+          {errors.address && <Text style={styles.errorText}>{errors.address}</Text>}
         </View>
 
         <View style={styles.row}>
@@ -146,11 +160,12 @@ const NewJobScreen = ({ navigation, route }: any) => {
               City <Text style={styles.required}>*</Text>
             </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.city && styles.inputError]}
               placeholder="New York"
               value={customerData.city}
               onChangeText={(value) => handleInputChange('city', value)}
             />
+            {errors.city && <Text style={styles.errorText}>{errors.city}</Text>}
           </View>
 
           <View style={[styles.inputGroup, styles.flex1, styles.marginLeft]}>
@@ -158,13 +173,14 @@ const NewJobScreen = ({ navigation, route }: any) => {
               State <Text style={styles.required}>*</Text>
             </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, errors.state && styles.inputError]}
               placeholder="NY"
               value={customerData.state}
               onChangeText={(value) => handleInputChange('state', value)}
               maxLength={2}
               autoCapitalize="characters"
             />
+            {errors.state && <Text style={styles.errorText}>{errors.state}</Text>}
           </View>
         </View>
 
@@ -253,6 +269,15 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     color: Colors.text,
+  },
+  inputError: {
+    borderColor: Colors.error,
+    borderWidth: 2,
+  },
+  errorText: {
+    color: Colors.error,
+    fontSize: 12,
+    marginTop: 4,
   },
   textArea: {
     minHeight: 100,
