@@ -12,7 +12,7 @@ import {
 import { Colors, DEFAULT_APP_SETTINGS } from '../constants';
 import StorageService from '../services/StorageService';
 
-const SettingsScreen = () => {
+const SettingsScreen = ({ navigation }: any) => {
   const [companyName, setCompanyName] = useState(DEFAULT_APP_SETTINGS.companyName);
   const [companyPhone, setCompanyPhone] = useState(DEFAULT_APP_SETTINGS.companyPhone);
   const [companyEmail, setCompanyEmail] = useState(DEFAULT_APP_SETTINGS.companyEmail);
@@ -22,6 +22,11 @@ const SettingsScreen = () => {
   const [enableNotifications, setEnableNotifications] = useState(true);
   const [autosave, setAutosave] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+
+  // Bluetooth state
+  const [isScanning, setIsScanning] = useState(false);
+  const [connectedDevice, setConnectedDevice] = useState<string | null>(null);
+  const [availableDevices, setAvailableDevices] = useState<Array<{id: string, name: string}>>([]);
 
   const handleSaveSettings = () => {
     Alert.alert('Success', 'Settings saved successfully');
@@ -49,9 +54,81 @@ const SettingsScreen = () => {
     Alert.alert('Export Data', 'Export functionality will be implemented here');
   };
 
+  const handleScanDevices = () => {
+    setIsScanning(true);
+    // TODO: Backend developer - Implement actual Bluetooth scanning here
+    // Use react-native-ble-plx or expo-bluetooth
+    // Scan for Bosch GLM and Leica Disto devices
+
+    // Simulated scan result for UI demonstration
+    setTimeout(() => {
+      setAvailableDevices([
+        { id: 'demo-1', name: 'Bosch GLM 50 C' },
+        { id: 'demo-2', name: 'Leica DISTO D2' },
+      ]);
+      setIsScanning(false);
+      Alert.alert('Scan Complete', 'Found compatible measurement devices. Tap a device to connect.');
+    }, 2000);
+  };
+
+  const handleConnectDevice = (deviceId: string, deviceName: string) => {
+    // TODO: Backend developer - Implement actual Bluetooth connection here
+    // Connect to the selected device
+    // Store device UUID/ID for future measurements
+
+    Alert.alert(
+      'Connect Device',
+      `Connect to ${deviceName}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Connect',
+          onPress: () => {
+            setConnectedDevice(deviceName);
+            setAvailableDevices([]);
+            Alert.alert('Success', `Connected to ${deviceName}`);
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDisconnectDevice = () => {
+    // TODO: Backend developer - Implement actual Bluetooth disconnection here
+
+    Alert.alert(
+      'Disconnect Device',
+      `Disconnect from ${connectedDevice}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Disconnect',
+          style: 'destructive',
+          onPress: () => {
+            setConnectedDevice(null);
+            Alert.alert('Disconnected', 'Device has been disconnected');
+          },
+        },
+      ]
+    );
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Company Information */}
+    <View style={styles.wrapper}>
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>‹</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Settings</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
+      <ScrollView style={styles.container}>
+        {/* Company Information */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Company Information</Text>
 
@@ -178,22 +255,81 @@ const SettingsScreen = () => {
 
       {/* Bluetooth Devices */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Bluetooth Devices</Text>
+        <Text style={styles.sectionTitle}>Bluetooth Measurement Devices</Text>
 
-        <View style={styles.deviceCard}>
-          <View style={styles.deviceIcon}>
-            <Text style={styles.deviceIconText}>BT</Text>
-          </View>
-          <View style={styles.deviceInfo}>
-            <Text style={styles.deviceName}>No devices paired</Text>
-            <Text style={styles.deviceStatus}>
-              Pair measurement devices for automatic capture
-            </Text>
-          </View>
+        <View style={styles.infoBox}>
+          <Text style={styles.infoText}>
+            📏 Supported devices: Bosch GLM series, Leica DISTO series
+          </Text>
         </View>
 
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Scan for Devices</Text>
+        {/* Connected Device */}
+        {connectedDevice && (
+          <View style={[styles.deviceCard, { backgroundColor: Colors.primaryLight + '20' }]}>
+            <View style={[styles.deviceIcon, { backgroundColor: Colors.success }]}>
+              <Text style={styles.deviceIconText}>✓</Text>
+            </View>
+            <View style={styles.deviceInfo}>
+              <Text style={styles.deviceName}>{connectedDevice}</Text>
+              <Text style={[styles.deviceStatus, { color: Colors.success }]}>
+                Connected and ready
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={handleDisconnectDevice}
+              style={styles.disconnectButton}
+            >
+              <Text style={styles.disconnectButtonText}>Disconnect</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* No Device Connected */}
+        {!connectedDevice && availableDevices.length === 0 && !isScanning && (
+          <View style={styles.deviceCard}>
+            <View style={styles.deviceIcon}>
+              <Text style={styles.deviceIconText}>BT</Text>
+            </View>
+            <View style={styles.deviceInfo}>
+              <Text style={styles.deviceName}>No devices connected</Text>
+              <Text style={styles.deviceStatus}>
+                Scan for Bosch GLM or Leica DISTO devices
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Available Devices List */}
+        {availableDevices.length > 0 && (
+          <View>
+            <Text style={styles.deviceListTitle}>Available Devices:</Text>
+            {availableDevices.map((device) => (
+              <TouchableOpacity
+                key={device.id}
+                style={styles.availableDeviceCard}
+                onPress={() => handleConnectDevice(device.id, device.name)}
+              >
+                <View style={[styles.deviceIcon, { backgroundColor: Colors.info }]}>
+                  <Text style={styles.deviceIconText}>📏</Text>
+                </View>
+                <View style={styles.deviceInfo}>
+                  <Text style={styles.deviceName}>{device.name}</Text>
+                  <Text style={styles.deviceStatus}>Tap to connect</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* Scan Button */}
+        <TouchableOpacity
+          style={[styles.button, isScanning && styles.buttonDisabled]}
+          onPress={handleScanDevices}
+          disabled={isScanning || !!connectedDevice}
+        >
+          <Text style={styles.buttonText}>
+            {isScanning ? 'Scanning...' : connectedDevice ? 'Device Connected' : 'Scan for Devices'}
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -253,12 +389,51 @@ const SettingsScreen = () => {
         <Text style={styles.saveButtonText}>Save All Settings</Text>
       </TouchableOpacity>
 
-      <View style={styles.bottomSpacer} />
-    </ScrollView>
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: Colors.backgroundGray,
+  },
+  header: {
+    backgroundColor: Colors.background,
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: 32,
+    color: Colors.primary,
+    fontWeight: '300',
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  headerSpacer: {
+    width: 40,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundGray,
@@ -415,6 +590,37 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 40,
+  },
+  deviceListTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  availableDeviceCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: Colors.backgroundGray,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.info,
+  },
+  disconnectButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: Colors.error,
+    borderRadius: 6,
+  },
+  disconnectButtonText: {
+    color: Colors.background,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });
 

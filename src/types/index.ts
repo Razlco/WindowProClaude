@@ -70,14 +70,29 @@ export enum JobStatus {
   CANCELLED = 'CANCELLED',
 }
 
+export enum WorkflowStatus {
+  NONE = 'NONE',
+  ESTIMATE_SCHEDULED = 'ESTIMATE_SCHEDULED',
+  MATERIALS_NEEDED = 'MATERIALS_NEEDED',
+  INSTALLER_MEASUREMENTS = 'INSTALLER_MEASUREMENTS',
+  SCHEDULED_FOR_INSTALL = 'SCHEDULED_FOR_INSTALL',
+  FOLLOW_UP_NEEDED = 'FOLLOW_UP_NEEDED',
+}
+
 export interface Job {
   id: string;
   jobNumber: string; // Auto-generated format: YYYYMMDD-XXX
   customer: Customer;
   measurements: Measurement[];
   status: JobStatus;
+  workflowStatus?: WorkflowStatus;
+  workflowStatusNotes?: string;
   scheduledDate?: Date;
   completedDate?: Date;
+  appointmentDate?: Date; // For estimate appointments
+  followUpDate?: Date; // For follow-up reminders
+  installDate?: Date; // For installation scheduling
+  workOrderNumber?: string; // For scheduled installs
   pricing: JobPricing;
   notes?: string;
   signatureDataUrl?: string;
@@ -127,4 +142,27 @@ export interface BluetoothDevice {
   name: string;
   isConnected: boolean;
   lastConnected?: Date;
+}
+
+export enum LeadStatus {
+  NEW = 'NEW',
+  CONTACTED = 'CONTACTED',
+  FOLLOW_UP = 'FOLLOW_UP',
+  SCHEDULED = 'SCHEDULED',
+  CONVERTED = 'CONVERTED',
+  CANCELLED = 'CANCELLED',
+}
+
+export interface Lead {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  interest: string; // Windows, Glass, Doors, or description
+  notes?: string;
+  status: LeadStatus;
+  followUpDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

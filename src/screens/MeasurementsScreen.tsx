@@ -84,6 +84,12 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     return Object.values(ProductType);
   };
 
+  const checkTemperedGlassRequirement = (widthNum: number, heightNum: number): boolean => {
+    // Calculate square footage
+    const squareFeet = (widthNum * heightNum) / 144; // Convert from square inches to square feet
+    return squareFeet >= 9;
+  };
+
   const handleAddMeasurement = () => {
     // Validate inputs
     const widthNum = parseFloat(width);
@@ -105,6 +111,43 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
       return;
     }
 
+    // Check if tempered glass should be suggested
+    const shouldSuggestTempered = checkTemperedGlassRequirement(widthNum, heightNum);
+    const isNotTempered = glassType !== GlassType.TEMPERED;
+
+    if (shouldSuggestTempered && isNotTempered) {
+      const squareFeet = ((widthNum * heightNum) / 144).toFixed(1);
+      Alert.alert(
+        'Building Code Notice',
+        `This glass is ${squareFeet} sq ft, which is 9 sq ft or larger.\n\nBuilding codes typically require tempered glass for:\n• Glass 9+ sq ft\n• Within 18" of the floor\n• Within 36" of a walkway\n\nWould you like to change this to tempered glass?`,
+        [
+          {
+            text: 'No, Keep Current',
+            style: 'cancel',
+            onPress: () => {
+              addMeasurement(widthNum, heightNum, quantityNum);
+            },
+          },
+          {
+            text: 'Yes, Use Tempered',
+            onPress: () => {
+              setGlassType(GlassType.TEMPERED);
+              addMeasurement(widthNum, heightNum, quantityNum, GlassType.TEMPERED);
+            },
+          },
+        ]
+      );
+    } else {
+      addMeasurement(widthNum, heightNum, quantityNum);
+    }
+  };
+
+  const addMeasurement = (
+    widthNum: number,
+    heightNum: number,
+    quantityNum: number,
+    overrideGlassType?: GlassType
+  ) => {
     const newMeasurement: Measurement = {
       id: generateMeasurementId(),
       width: widthNum,
@@ -112,7 +155,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
       depth: depth ? parseFloat(depth) : undefined,
       quantity: quantityNum,
       productType,
-      glassType,
+      glassType: overrideGlassType || glassType,
       frameType,
       hingePlacement,
       notes: notes.trim() || undefined,
@@ -306,6 +349,24 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                   />
                 </View>
               </View>
+
+              {/* Bluetooth Measurement Button */}
+              <TouchableOpacity
+                style={styles.bluetoothButton}
+                onPress={() => {
+                  // TODO: Backend developer - Read measurement from connected Bluetooth device
+                  // Use BluetoothService to read width and height from Bosch GLM or Leica DISTO
+                  // Then call: setWidth(measurement.width.toString()); setHeight(measurement.height.toString());
+                  Alert.alert(
+                    'Bluetooth Device',
+                    'This will read measurements from your connected Bosch GLM or Leica DISTO device.\n\nBackend implementation pending.',
+                    [{ text: 'OK' }]
+                  );
+                }}
+              >
+                <Text style={styles.bluetoothButtonIcon}>📏</Text>
+                <Text style={styles.bluetoothButtonText}>Use Bluetooth Device</Text>
+              </TouchableOpacity>
 
               <View style={styles.row}>
                 <View style={[styles.inputGroup, styles.flex1]}>
@@ -793,6 +854,26 @@ const styles = StyleSheet.create({
   cancelCategoryButtonText: {
     color: Colors.text,
     fontSize: 16,
+    fontWeight: '600',
+  },
+  bluetoothButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.info,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: Colors.info,
+  },
+  bluetoothButtonIcon: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  bluetoothButtonText: {
+    color: Colors.background,
+    fontSize: 14,
     fontWeight: '600',
   },
 });

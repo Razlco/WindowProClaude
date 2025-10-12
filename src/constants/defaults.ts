@@ -20,6 +20,7 @@ export const STORAGE_KEYS = {
   SETTINGS: '@settings',
   BLUETOOTH_DEVICES: '@bluetooth_devices',
   LAST_JOB_NUMBER: '@last_job_number',
+  LEADS: '@leads',
 };
 
 // Date formats

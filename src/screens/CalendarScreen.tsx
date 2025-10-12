@@ -4,28 +4,81 @@ import { Calendar } from 'react-native-calendars';
 import { Colors } from '../constants';
 import { useJobStorage } from '../hooks';
 import { formatCalendarDate, formatDisplayDate } from '../utils';
-import { Job } from '../types';
+import { Job, WorkflowStatus } from '../types';
+
+type DateEvent = {
+  job: Job;
+  type: 'appointment' | 'followup' | 'install';
+  color: string;
+  label: string;
+};
 
 const CalendarScreen = ({ navigation }: any) => {
   const { jobs } = useJobStorage();
   const [selectedDate, setSelectedDate] = useState(formatCalendarDate(new Date()));
 
-  // Create marked dates from scheduled jobs
+  // Create marked dates from workflow dates
   const markedDates = useMemo(() => {
     const marked: any = {};
+    const dateEvents: Record<string, DateEvent[]> = {};
 
     jobs.forEach((job) => {
+      // Check appointment date
+      if (job.appointmentDate) {
+        const dateStr = formatCalendarDate(job.appointmentDate);
+        if (!dateEvents[dateStr]) dateEvents[dateStr] = [];
+        dateEvents[dateStr].push({
+          job,
+          type: 'appointment',
+          color: Colors.info,
+          label: 'Estimate Appointment',
+        });
+      }
+
+      // Check follow-up date
+      if (job.followUpDate) {
+        const dateStr = formatCalendarDate(job.followUpDate);
+        if (!dateEvents[dateStr]) dateEvents[dateStr] = [];
+        dateEvents[dateStr].push({
+          job,
+          type: 'followup',
+          color: Colors.warning,
+          label: 'Follow-up',
+        });
+      }
+
+      // Check install date
+      if (job.installDate) {
+        const dateStr = formatCalendarDate(job.installDate);
+        if (!dateEvents[dateStr]) dateEvents[dateStr] = [];
+        dateEvents[dateStr].push({
+          job,
+          type: 'install',
+          color: Colors.success,
+          label: 'Installation',
+        });
+      }
+
+      // Legacy scheduled date support
       if (job.scheduledDate) {
         const dateStr = formatCalendarDate(job.scheduledDate);
-        if (!marked[dateStr]) {
-          marked[dateStr] = {
-            marked: true,
-            dotColor: Colors.primary,
-            jobs: [],
-          };
-        }
-        marked[dateStr].jobs.push(job);
+        if (!dateEvents[dateStr]) dateEvents[dateStr] = [];
+        dateEvents[dateStr].push({
+          job,
+          type: 'appointment',
+          color: Colors.primary,
+          label: 'Scheduled',
+        });
       }
+    });
+
+    // Convert events to marked dates
+    Object.entries(dateEvents).forEach(([dateStr, events]) => {
+      const dots = events.map(event => ({ color: event.color }));
+      marked[dateStr] = {
+        dots,
+        events,
+      };
     });
 
     // Add selected date styling
@@ -36,27 +89,55 @@ const CalendarScreen = ({ navigation }: any) => {
       marked[selectedDate] = {
         selected: true,
         selectedColor: Colors.primary,
-        jobs: [],
+        events: [],
       };
     }
 
     return marked;
   }, [jobs, selectedDate]);
 
-  // Get jobs for selected date
-  const selectedDateJobs = markedDates[selectedDate]?.jobs || [];
+  // Get events for selected date
+  const selectedDateEvents: DateEvent[] = markedDates[selectedDate]?.events || [];
 
   const handleJobPress = (jobId: string) => {
     navigation.navigate('JobDetails', { jobId });
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.calendarSection}>
+    <View style={styles.container}>
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>‹</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Calendar</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.calendarSection}>
+          <View style={styles.legendContainer}>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: Colors.info }]} />
+              <Text style={styles.legendText}>Appointment</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: Colors.success }]} />
+              <Text style={styles.legendText}>Installation</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: Colors.warning }]} />
+              <Text style={styles.legendText}>Follow-up</Text>
+            </View>
+          </View>
         <Calendar
           current={selectedDate}
           onDayPress={(day: any) => setSelectedDate(day.dateString)}
           markedDates={markedDates}
+          markingType="multi-dot"
           theme={{
             backgroundColor: Colors.background,
             calendarBackground: Colors.background,
@@ -83,55 +164,65 @@ const CalendarScreen = ({ navigation }: any) => {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          Jobs on {formatDisplayDate(selectedDate)}
+          Events on {formatDisplayDate(selectedDate)}
         </Text>
 
-        {selectedDateJobs.length === 0 ? (
+        {selectedDateEvents.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No jobs scheduled for this date</Text>
+            <Text style={styles.emptyText}>No events scheduled for this date</Text>
             <Text style={styles.emptySubtext}>
-              Jobs with scheduled dates will appear here
+              Appointments, follow-ups, and installations will appear here
             </Text>
           </View>
         ) : (
-          selectedDateJobs.map((job: Job) => (
+          selectedDateEvents.map((event, index) => (
             <TouchableOpacity
-              key={job.id}
-              style={styles.jobCard}
-              onPress={() => handleJobPress(job.id)}
+              key={`${event.job.id}-${event.type}-${index}`}
+              style={styles.eventCard}
+              onPress={() => handleJobPress(event.job.id)}
             >
-              <View style={styles.jobHeader}>
-                <Text style={styles.jobNumber}>{job.jobNumber}</Text>
-                <View
-                  style={[
-                    styles.statusBadge,
-                    {
-                      backgroundColor:
-                        {
-                          DRAFT: Colors.draft,
-                          QUOTED: Colors.quoted,
-                          APPROVED: Colors.approved,
-                          IN_PROGRESS: Colors.inProgress,
-                          COMPLETED: Colors.completed,
-                          CANCELLED: Colors.cancelled,
-                        }[job.status] || Colors.text,
-                    },
-                  ]}
-                >
-                  <Text style={styles.statusText}>{job.status}</Text>
+              <View style={[styles.eventIndicator, { backgroundColor: event.color }]} />
+
+              <View style={styles.eventContent}>
+                <View style={styles.eventHeader}>
+                  <Text style={styles.eventType}>{event.label}</Text>
+                  <Text style={styles.jobNumber}>{event.job.jobNumber}</Text>
                 </View>
-              </View>
 
-              <Text style={styles.customerName}>{job.customer.name}</Text>
-              <Text style={styles.customerAddress}>
-                {job.customer.address}, {job.customer.city}
-              </Text>
-              <Text style={styles.customerPhone}>{job.customer.phone}</Text>
-
-              <View style={styles.jobFooter}>
-                <Text style={styles.measurementCount}>
-                  {job.measurements.length} measurement{job.measurements.length !== 1 ? 's' : ''}
+                <Text style={styles.customerName}>{event.job.customer.name}</Text>
+                <Text style={styles.customerAddress}>
+                  {event.job.customer.address}, {event.job.customer.city}
                 </Text>
+                <Text style={styles.customerPhone}>{event.job.customer.phone}</Text>
+
+                <View style={styles.eventFooter}>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      {
+                        backgroundColor:
+                          {
+                            DRAFT: Colors.draft,
+                            QUOTED: Colors.quoted,
+                            APPROVED: Colors.approved,
+                            IN_PROGRESS: Colors.inProgress,
+                            COMPLETED: Colors.completed,
+                            CANCELLED: Colors.cancelled,
+                          }[event.job.status] || Colors.text,
+                      },
+                    ]}
+                  >
+                    <Text style={styles.statusText}>{event.job.status}</Text>
+                  </View>
+
+                  {event.job.workflowStatus && event.job.workflowStatus !== 'NONE' && (
+                    <View style={[styles.workflowBadge, { backgroundColor: event.color }]}>
+                      <Text style={styles.workflowText}>
+                        {event.job.workflowStatus.replace(/_/g, ' ')}
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </View>
             </TouchableOpacity>
           ))
@@ -144,35 +235,38 @@ const CalendarScreen = ({ navigation }: any) => {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>{jobs.filter(j => j.scheduledDate).length}</Text>
-            <Text style={styles.statLabel}>Scheduled Jobs</Text>
+            <Text style={[styles.statValue, { color: Colors.info }]}>
+              {jobs.filter(j => j.appointmentDate).length}
+            </Text>
+            <Text style={styles.statLabel}>Appointments</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={styles.statValue}>
+            <Text style={[styles.statValue, { color: Colors.success }]}>
+              {jobs.filter(j => j.installDate).length}
+            </Text>
+            <Text style={styles.statLabel}>Installations</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: Colors.warning }]}>
+              {jobs.filter(j => j.followUpDate).length}
+            </Text>
+            <Text style={styles.statLabel}>Follow-ups</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={[styles.statValue, { color: Colors.primary }]}>
               {jobs.filter(j => j.status === 'IN_PROGRESS').length}
             </Text>
             <Text style={styles.statLabel}>In Progress</Text>
           </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>
-              {jobs.filter(j => j.status === 'COMPLETED').length}
-            </Text>
-            <Text style={styles.statLabel}>Completed</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>
-              {jobs.filter(j => j.status === 'DRAFT').length}
-            </Text>
-            <Text style={styles.statLabel}>Drafts</Text>
-          </View>
         </View>
       </View>
 
-      <View style={styles.bottomSpacer} />
-    </ScrollView>
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+    </View>
   );
 };
 
@@ -181,10 +275,71 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.backgroundGray,
   },
+  header: {
+    backgroundColor: Colors.background,
+    paddingHorizontal: 16,
+    paddingTop: 50,
+    paddingBottom: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: 32,
+    color: Colors.primary,
+    fontWeight: '300',
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  scrollView: {
+    flex: 1,
+  },
   calendarSection: {
     backgroundColor: Colors.background,
     marginBottom: 12,
     paddingBottom: 16,
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontWeight: '500',
   },
   section: {
     backgroundColor: Colors.background,
@@ -212,24 +367,58 @@ const styles = StyleSheet.create({
     color: Colors.textLight,
     textAlign: 'center',
   },
-  jobCard: {
+  eventCard: {
     backgroundColor: Colors.backgroundGray,
     borderRadius: 12,
-    padding: 16,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: Colors.border,
+    flexDirection: 'row',
+    overflow: 'hidden',
   },
-  jobHeader: {
+  eventIndicator: {
+    width: 4,
+  },
+  eventContent: {
+    flex: 1,
+    padding: 16,
+  },
+  eventHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
+  },
+  eventType: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.text,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  eventFooter: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
   },
   jobNumber: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: Colors.primary,
+  },
+  workflowBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  workflowText: {
+    color: Colors.background,
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -255,17 +444,7 @@ const styles = StyleSheet.create({
   customerPhone: {
     fontSize: 14,
     color: Colors.textSecondary,
-    marginBottom: 12,
-  },
-  jobFooter: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingTop: 12,
-  },
-  measurementCount: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontWeight: '500',
+    marginBottom: 4,
   },
   statsGrid: {
     flexDirection: 'row',

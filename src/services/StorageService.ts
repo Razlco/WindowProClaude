@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Job, Customer, AppSettings } from '../types';
+import { Job, Customer, AppSettings, Lead } from '../types';
 import { STORAGE_KEYS, DEFAULT_APP_SETTINGS } from '../constants';
 
 /**
@@ -157,6 +157,81 @@ class StorageService {
       );
     } catch (error) {
       console.error('Error saving last job number:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get all jobs (alias for loadJobs for consistency)
+   */
+  async getAllJobs(): Promise<Job[]> {
+    return this.loadJobs();
+  }
+
+  /**
+   * Save leads to storage
+   */
+  async saveLeads(leads: Lead[]): Promise<void> {
+    try {
+      const jsonValue = JSON.stringify(leads);
+      await AsyncStorage.setItem(STORAGE_KEYS.LEADS, jsonValue);
+    } catch (error) {
+      console.error('Error saving leads:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Load leads from storage
+   */
+  async loadLeads(): Promise<Lead[]> {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEYS.LEADS);
+      return jsonValue != null ? JSON.parse(jsonValue) : [];
+    } catch (error) {
+      console.error('Error loading leads:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get all leads (alias for loadLeads for consistency)
+   */
+  async getAllLeads(): Promise<Lead[]> {
+    return this.loadLeads();
+  }
+
+  /**
+   * Save a single lead
+   */
+  async saveLead(lead: Lead): Promise<void> {
+    try {
+      const leads = await this.loadLeads();
+      const index = leads.findIndex((l) => l.id === lead.id);
+
+      if (index >= 0) {
+        leads[index] = lead;
+      } else {
+        leads.push(lead);
+      }
+
+      await this.saveLeads(leads);
+    } catch (error) {
+      console.error('Error saving lead:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a lead
+   */
+  async deleteLead(leadId: string): Promise<void> {
+    try {
+      const leads = await this.loadLeads();
+      const filteredLeads = leads.filter((l) => l.id !== leadId);
+      await this.saveLeads(filteredLeads);
+    } catch (error) {
+      console.error('Error deleting lead:', error);
       throw error;
     }
   }
