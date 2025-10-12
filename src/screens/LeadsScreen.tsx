@@ -253,8 +253,8 @@ const LeadsScreen = ({ navigation }: any) => {
                 {/* Lead Header */}
                 <View style={styles.leadHeader}>
                   <Text style={styles.leadName}>{lead.name}</Text>
-                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(lead.status) + '20' }]}>
-                    <Text style={[styles.statusText, { color: getStatusColor(lead.status) }]}>
+                  <View style={(styles as any)[`statusBadge${lead.status}`] || styles.statusBadge}>
+                    <Text style={(styles as any)[`statusText${lead.status}`] || styles.statusText}>
                       {getStatusLabel(lead.status)}
                     </Text>
                   </View>
@@ -497,10 +497,88 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginLeft: 8,
   },
+  statusBadgeNEW: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+    backgroundColor: Colors.info + '20',
+  },
+  statusBadgeCONTACTED: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+    backgroundColor: Colors.primary + '20',
+  },
+  statusBadgeFOLLOW_UP: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+    backgroundColor: Colors.warning + '20',
+  },
+  statusBadgeSCHEDULED: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+    backgroundColor: Colors.success + '20',
+  },
+  statusBadgeCONVERTED: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+    backgroundColor: Colors.success + '20',
+  },
+  statusBadgeCANCELLED: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+    backgroundColor: Colors.error + '20',
+  },
   statusText: {
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'capitalize',
+  },
+  statusTextNEW: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.info,
+  },
+  statusTextCONTACTED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.primary,
+  },
+  statusTextFOLLOW_UP: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.warning,
+  },
+  statusTextSCHEDULED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.success,
+  },
+  statusTextCONVERTED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.success,
+  },
+  statusTextCANCELLED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.error,
   },
   leadDetail: {
     fontSize: 14,

@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Alert,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, DEFAULT_MEASUREMENT } from '../constants';
@@ -246,7 +248,11 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView style={styles.scrollView}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
+      >
+        <ScrollView style={styles.scrollView}>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Customer</Text>
           <Text style={styles.customerName}>{customer.name}</Text>
@@ -578,6 +584,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </KeyboardAvoidingView>
 
       {measurements.length > 0 && !showForm && (
         <View style={styles.footer}>
@@ -601,6 +608,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundGray,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,

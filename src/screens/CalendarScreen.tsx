@@ -123,15 +123,15 @@ const CalendarScreen = ({ navigation }: any) => {
         <View style={styles.calendarSection}>
           <View style={styles.legendContainer}>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: Colors.info }]} />
+              <View style={styles.legendDotInfo} />
               <Text style={styles.legendText}>Appointment</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: Colors.success }]} />
+              <View style={styles.legendDotSuccess} />
               <Text style={styles.legendText}>Installation</Text>
             </View>
             <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: Colors.warning }]} />
+              <View style={styles.legendDotWarning} />
               <Text style={styles.legendText}>Follow-up</Text>
             </View>
           </View>
@@ -184,7 +184,7 @@ const CalendarScreen = ({ navigation }: any) => {
               onPress={() => handleJobPress(event.job.id)}
               activeOpacity={0.7}
             >
-              <View style={[styles.eventIndicator, { backgroundColor: event.color }]} />
+              <View style={[styles.eventIndicator, (styles as any)[`eventIndicator${event.type.charAt(0).toUpperCase() + event.type.slice(1)}`]]} />
 
               <View style={styles.eventContent}>
                 <View style={styles.eventHeader}>
@@ -199,27 +199,17 @@ const CalendarScreen = ({ navigation }: any) => {
                 <Text style={styles.customerPhone}>{event.job.customer.phone}</Text>
 
                 <View style={styles.eventFooter}>
-                  <View
-                    style={[
-                      styles.statusBadge,
-                      {
-                        backgroundColor:
-                          {
-                            DRAFT: Colors.draft,
-                            QUOTED: Colors.quoted,
-                            APPROVED: Colors.approved,
-                            IN_PROGRESS: Colors.inProgress,
-                            COMPLETED: Colors.completed,
-                            CANCELLED: Colors.cancelled,
-                          }[event.job.status] || Colors.text,
-                      },
-                    ]}
-                  >
+                  <View style={(styles as any)[`statusBadge${event.job.status.replace(/_/g, '')}`] || styles.statusBadge}>
                     <Text style={styles.statusText}>{event.job.status}</Text>
                   </View>
 
                   {event.job.workflowStatus && event.job.workflowStatus !== 'NONE' && (
-                    <View style={[styles.workflowBadge, { backgroundColor: event.color }]}>
+                    <View style={[
+                      styles.workflowBadge,
+                      event.type === 'appointment' && styles.workflowBadgeAppointment,
+                      event.type === 'followup' && styles.workflowBadgeFollowup,
+                      event.type === 'install' && styles.workflowBadgeInstall
+                    ]}>
                       <Text style={styles.workflowText}>
                         {event.job.workflowStatus.replace(/_/g, ' ')}
                       </Text>
@@ -238,28 +228,28 @@ const CalendarScreen = ({ navigation }: any) => {
 
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: Colors.info }]}>
+            <Text style={styles.statValueInfo}>
               {jobs.filter(j => j.appointmentDate).length}
             </Text>
             <Text style={styles.statLabel}>Appointments</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: Colors.success }]}>
+            <Text style={styles.statValueSuccess}>
               {jobs.filter(j => j.installDate).length}
             </Text>
             <Text style={styles.statLabel}>Installations</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: Colors.warning }]}>
+            <Text style={styles.statValueWarning}>
               {jobs.filter(j => j.followUpDate).length}
             </Text>
             <Text style={styles.statLabel}>Follow-ups</Text>
           </View>
 
           <View style={styles.statCard}>
-            <Text style={[styles.statValue, { color: Colors.primary }]}>
+            <Text style={styles.statValuePrimary}>
               {jobs.filter(j => j.status === 'IN_PROGRESS').length}
             </Text>
             <Text style={styles.statLabel}>In Progress</Text>
@@ -339,6 +329,24 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
   },
+  legendDotInfo: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.info,
+  },
+  legendDotSuccess: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.success,
+  },
+  legendDotWarning: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.warning,
+  },
   legendText: {
     fontSize: 12,
     color: Colors.textSecondary,
@@ -382,6 +390,18 @@ const styles = StyleSheet.create({
   eventIndicator: {
     width: 4,
   },
+  eventIndicatorAppointment: {
+    width: 4,
+    backgroundColor: Colors.info,
+  },
+  eventIndicatorFollowup: {
+    width: 4,
+    backgroundColor: Colors.warning,
+  },
+  eventIndicatorInstall: {
+    width: 4,
+    backgroundColor: Colors.success,
+  },
   eventContent: {
     flex: 1,
     padding: 16,
@@ -417,6 +437,15 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
   },
+  workflowBadgeAppointment: {
+    backgroundColor: Colors.info,
+  },
+  workflowBadgeFollowup: {
+    backgroundColor: Colors.warning,
+  },
+  workflowBadgeInstall: {
+    backgroundColor: Colors.success,
+  },
   workflowText: {
     color: Colors.background,
     fontSize: 12,
@@ -427,6 +456,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
+  },
+  statusBadgeDRAFT: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.draft,
+  },
+  statusBadgeQUOTED: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.quoted,
+  },
+  statusBadgeAPPROVED: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.approved,
+  },
+  statusBadgeINPROGRESS: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.inProgress,
+  },
+  statusBadgeCOMPLETED: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.completed,
+  },
+  statusBadgeCANCELLED: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.cancelled,
   },
   statusText: {
     color: Colors.background,
@@ -459,6 +524,34 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   statValue: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  statValueInfo: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: Colors.info,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  statValueSuccess: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: Colors.success,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  statValueWarning: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: Colors.warning,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  statValuePrimary: {
     fontSize: 32,
     fontWeight: 'bold',
     color: Colors.primary,

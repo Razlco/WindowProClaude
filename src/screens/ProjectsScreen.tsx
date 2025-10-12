@@ -553,7 +553,7 @@ const ProjectsScreen = ({ navigation }: any) => {
           data={filteredJobs.slice(0, displayLimit)}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
           contentContainerStyle={styles.listContent}
           refreshing={loading}
           onRefresh={loadJobs}
@@ -704,6 +704,9 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 20,
+  },
+  itemSeparator: {
+    height: 12,
   },
   emptyState: {
     flex: 1,

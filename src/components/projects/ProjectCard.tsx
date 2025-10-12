@@ -97,13 +97,8 @@ const ProjectCard = memo(
                   onStatusPress?.(job);
                 }}
               >
-                <View
-                  style={[
-                    styles.compactStatusBadge,
-                    { backgroundColor: getStatusColor(job.status) + '20' },
-                  ]}
-                >
-                  <Text style={[styles.compactStatusText, { color: getStatusColor(job.status) }]}>
+                <View style={(styles as any)[`compactStatusBadge${job.status.replace(/_/g, '')}`] || styles.compactStatusBadge}>
+                  <Text style={(styles as any)[`compactStatusText${job.status.replace(/_/g, '')}`] || styles.compactStatusText}>
                     {job.status}
                   </Text>
                 </View>
@@ -115,14 +110,9 @@ const ProjectCard = memo(
                     onWorkflowPress?.(job);
                   }}
                 >
-                  <View
-                    style={[
-                      styles.compactWorkflowBadge,
-                      { backgroundColor: workflowConfig.color + '20' },
-                    ]}
-                  >
+                  <View style={(styles as any)[`compactWorkflowBadge${job.workflowStatus || ''}`] || styles.compactWorkflowBadge}>
                     <Text style={styles.compactWorkflowIcon}>{workflowConfig.icon}</Text>
-                    <Text style={[styles.compactWorkflowText, { color: workflowConfig.color }]}>
+                    <Text style={(styles as any)[`compactWorkflowText${job.workflowStatus || ''}`] || styles.compactWorkflowText}>
                       {workflowConfig.label}
                     </Text>
                   </View>
@@ -158,13 +148,8 @@ const ProjectCard = memo(
                 onStatusPress?.(job);
               }}
             >
-              <View
-                style={[
-                  styles.detailedStatusBadge,
-                  { backgroundColor: getStatusColor(job.status) + '20' },
-                ]}
-              >
-                <Text style={[styles.detailedStatusText, { color: getStatusColor(job.status) }]}>
+              <View style={(styles as any)[`detailedStatusBadge${job.status.replace(/_/g, '')}`] || styles.detailedStatusBadge}>
+                <Text style={(styles as any)[`detailedStatusText${job.status.replace(/_/g, '')}`] || styles.detailedStatusText}>
                   {job.status}
                 </Text>
               </View>
@@ -181,9 +166,9 @@ const ProjectCard = memo(
             }}
             style={{ alignSelf: 'flex-start', marginTop: 8 }}
           >
-            <View style={[styles.workflowBadge, { backgroundColor: workflowConfig.color + '20' }]}>
+            <View style={(styles as any)[`workflowBadge${job.workflowStatus || ''}`] || styles.workflowBadge}>
               <Text style={styles.workflowIcon}>{workflowConfig.icon}</Text>
-              <Text style={[styles.workflowText, { color: workflowConfig.color }]}>
+              <Text style={(styles as any)[`workflowText${job.workflowStatus || ''}`] || styles.workflowText}>
                 {workflowConfig.label}
               </Text>
             </View>
@@ -269,10 +254,82 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 10,
   },
+  compactStatusBadgeDRAFT: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    backgroundColor: Colors.textSecondary + '20',
+  },
+  compactStatusBadgeQUOTED: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    backgroundColor: Colors.info + '20',
+  },
+  compactStatusBadgeAPPROVED: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    backgroundColor: Colors.success + '20',
+  },
+  compactStatusBadgeINPROGRESS: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    backgroundColor: Colors.primary + '20',
+  },
+  compactStatusBadgeCOMPLETED: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    backgroundColor: Colors.success + '20',
+  },
+  compactStatusBadgeCANCELLED: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    backgroundColor: Colors.error + '20',
+  },
   compactStatusText: {
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
+  },
+  compactStatusTextDRAFT: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    color: Colors.textSecondary,
+  },
+  compactStatusTextQUOTED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    color: Colors.info,
+  },
+  compactStatusTextAPPROVED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    color: Colors.success,
+  },
+  compactStatusTextINPROGRESS: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    color: Colors.primary,
+  },
+  compactStatusTextCOMPLETED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    color: Colors.success,
+  },
+  compactStatusTextCANCELLED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    color: Colors.error,
   },
   compactWorkflowBadge: {
     flexDirection: 'row',
@@ -282,12 +339,82 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     gap: 3,
   },
+  compactWorkflowBadgeESTIMATE_SCHEDULED: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    gap: 3,
+    backgroundColor: '#3B82F6' + '20',
+  },
+  compactWorkflowBadgeMATERIALS_NEEDED: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    gap: 3,
+    backgroundColor: '#F59E0B' + '20',
+  },
+  compactWorkflowBadgeINSTALLER_MEASUREMENTS: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    gap: 3,
+    backgroundColor: '#8B5CF6' + '20',
+  },
+  compactWorkflowBadgeSCHEDULED_FOR_INSTALL: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    gap: 3,
+    backgroundColor: '#10B981' + '20',
+  },
+  compactWorkflowBadgeFOLLOW_UP_NEEDED: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+    gap: 3,
+    backgroundColor: '#EF4444' + '20',
+  },
   compactWorkflowIcon: {
     fontSize: 12,
   },
   compactWorkflowText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  compactWorkflowTextESTIMATE_SCHEDULED: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#3B82F6',
+  },
+  compactWorkflowTextMATERIALS_NEEDED: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#F59E0B',
+  },
+  compactWorkflowTextINSTALLER_MEASUREMENTS: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8B5CF6',
+  },
+  compactWorkflowTextSCHEDULED_FOR_INSTALL: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  compactWorkflowTextFOLLOW_UP_NEEDED: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#EF4444',
   },
   compactCustomerName: {
     fontSize: 15,
@@ -340,10 +467,82 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
   },
+  detailedStatusBadgeDRAFT: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.textSecondary + '20',
+  },
+  detailedStatusBadgeQUOTED: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.info + '20',
+  },
+  detailedStatusBadgeAPPROVED: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.success + '20',
+  },
+  detailedStatusBadgeINPROGRESS: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.primary + '20',
+  },
+  detailedStatusBadgeCOMPLETED: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.success + '20',
+  },
+  detailedStatusBadgeCANCELLED: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    backgroundColor: Colors.error + '20',
+  },
   detailedStatusText: {
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'capitalize',
+  },
+  detailedStatusTextDRAFT: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.textSecondary,
+  },
+  detailedStatusTextQUOTED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.info,
+  },
+  detailedStatusTextAPPROVED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.success,
+  },
+  detailedStatusTextINPROGRESS: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.primary,
+  },
+  detailedStatusTextCOMPLETED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.success,
+  },
+  detailedStatusTextCANCELLED: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: Colors.error,
   },
   workflowBadge: {
     flexDirection: 'row',
@@ -353,12 +552,82 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 5,
   },
+  workflowBadgeESTIMATE_SCHEDULED: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    gap: 5,
+    backgroundColor: '#3B82F6' + '20',
+  },
+  workflowBadgeMATERIALS_NEEDED: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    gap: 5,
+    backgroundColor: '#F59E0B' + '20',
+  },
+  workflowBadgeINSTALLER_MEASUREMENTS: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    gap: 5,
+    backgroundColor: '#8B5CF6' + '20',
+  },
+  workflowBadgeSCHEDULED_FOR_INSTALL: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    gap: 5,
+    backgroundColor: '#10B981' + '20',
+  },
+  workflowBadgeFOLLOW_UP_NEEDED: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+    gap: 5,
+    backgroundColor: '#EF4444' + '20',
+  },
   workflowIcon: {
     fontSize: 14,
   },
   workflowText: {
     fontSize: 12,
     fontWeight: '600',
+  },
+  workflowTextESTIMATE_SCHEDULED: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#3B82F6',
+  },
+  workflowTextMATERIALS_NEEDED: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#F59E0B',
+  },
+  workflowTextINSTALLER_MEASUREMENTS: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8B5CF6',
+  },
+  workflowTextSCHEDULED_FOR_INSTALL: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  workflowTextFOLLOW_UP_NEEDED: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#EF4444',
   },
   detailedCustomerName: {
     fontSize: 18,

@@ -7,6 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants';
@@ -81,8 +83,12 @@ const NewJobScreen = ({ navigation, route }: any) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView style={styles.scrollView}>
-      <View style={styles.section}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
+      >
+        <ScrollView style={styles.scrollView}>
+        <View style={styles.section}>
         <Text style={styles.sectionTitle}>Customer Information</Text>
 
         <View style={styles.inputGroup}>
@@ -200,6 +206,7 @@ const NewJobScreen = ({ navigation, route }: any) => {
 
       <View style={styles.bottomSpacer} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -208,6 +215,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.backgroundGray,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,

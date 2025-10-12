@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, DEFAULT_APP_SETTINGS } from '../constants';
@@ -129,7 +131,11 @@ const SettingsScreen = ({ navigation }: any) => {
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoid}
+      >
+        <ScrollView style={styles.container}>
         {/* Company Information */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Company Information</Text>
@@ -400,6 +406,7 @@ const SettingsScreen = ({ navigation }: any) => {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -442,6 +449,9 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   container: {
     flex: 1,

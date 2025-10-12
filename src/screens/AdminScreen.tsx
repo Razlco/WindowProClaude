@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants';
@@ -68,29 +68,29 @@ const AdminScreen = ({ navigation }: any) => {
         <Text style={styles.sectionTitle}>Key Metrics</Text>
 
         <View style={styles.metricsGrid}>
-          <View style={[styles.metricCard, { backgroundColor: Colors.primary + '15' }]}>
-            <Text style={[styles.metricValue, { color: Colors.primary }]}>
+          <View style={styles.metricCardPrimary}>
+            <Text style={styles.metricValuePrimary}>
               {stats.totalJobs}
             </Text>
             <Text style={styles.metricLabel}>Total Jobs</Text>
           </View>
 
-          <View style={[styles.metricCard, { backgroundColor: Colors.success + '15' }]}>
-            <Text style={[styles.metricValue, { color: Colors.success }]}>
+          <View style={styles.metricCardSuccess}>
+            <Text style={styles.metricValueSuccess}>
               {formatCurrency(stats.totalRevenue)}
             </Text>
             <Text style={styles.metricLabel}>Total Revenue</Text>
           </View>
 
-          <View style={[styles.metricCard, { backgroundColor: Colors.accent + '15' }]}>
-            <Text style={[styles.metricValue, { color: Colors.accent }]}>
+          <View style={styles.metricCardAccent}>
+            <Text style={styles.metricValueAccent}>
               {formatCurrency(stats.avgJobValue)}
             </Text>
             <Text style={styles.metricLabel}>Avg Job Value</Text>
           </View>
 
-          <View style={[styles.metricCard, { backgroundColor: Colors.info + '15' }]}>
-            <Text style={[styles.metricValue, { color: Colors.info }]}>
+          <View style={styles.metricCardInfo}>
+            <Text style={styles.metricValueInfo}>
               {stats.statusCounts['COMPLETED'] || 0}
             </Text>
             <Text style={styles.metricLabel}>Completed</Text>
@@ -104,22 +104,7 @@ const AdminScreen = ({ navigation }: any) => {
 
         {Object.entries(stats.statusCounts).map(([status, count]) => (
           <View key={status} style={styles.statsRow}>
-            <View
-              style={[
-                styles.statusDot,
-                {
-                  backgroundColor:
-                    {
-                      DRAFT: Colors.draft,
-                      QUOTED: Colors.quoted,
-                      APPROVED: Colors.approved,
-                      IN_PROGRESS: Colors.inProgress,
-                      COMPLETED: Colors.completed,
-                      CANCELLED: Colors.cancelled,
-                    }[status] || Colors.text,
-                },
-              ]}
-            />
+            <View style={(styles as any)[`statusDot${status.replace(/_/g, '')}`] || styles.statusDot} />
             <Text style={styles.statsLabel}>{status.replace('_', ' ')}</Text>
             <Text style={styles.statsValue}>{count}</Text>
           </View>
@@ -132,32 +117,23 @@ const AdminScreen = ({ navigation }: any) => {
 
         {Object.entries(stats.productTypeCounts)
           .sort(([, a], [, b]) => b - a)
-          .map(([type, count]) => (
-            <View key={type} style={styles.progressRow}>
-              <View style={styles.progressHeader}>
-                <Text style={styles.progressLabel}>{type.replace('_', ' ')}</Text>
-                <Text style={styles.progressValue}>{count} units</Text>
+          .map(([type, count]) => {
+            const percentage = Math.min(
+              (count / Math.max(...Object.values(stats.productTypeCounts))) * 100,
+              100
+            );
+            return (
+              <View key={type} style={styles.progressRow}>
+                <View style={styles.progressHeader}>
+                  <Text style={styles.progressLabel}>{type.replace('_', ' ')}</Text>
+                  <Text style={styles.progressValue}>{count} units</Text>
+                </View>
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBarPrimary, { width: `${percentage}%` }]} />
+                </View>
               </View>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${Math.min(
-                        (count /
-                          Math.max(
-                            ...Object.values(stats.productTypeCounts)
-                          )) *
-                          100,
-                        100
-                      )}%`,
-                      backgroundColor: Colors.primary,
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          ))}
+            );
+          })}
 
         {Object.keys(stats.productTypeCounts).length === 0 && (
           <Text style={styles.emptyText}>No product data yet</Text>
@@ -170,30 +146,23 @@ const AdminScreen = ({ navigation }: any) => {
 
         {Object.entries(stats.glassTypeCounts)
           .sort(([, a], [, b]) => b - a)
-          .map(([type, count]) => (
-            <View key={type} style={styles.progressRow}>
-              <View style={styles.progressHeader}>
-                <Text style={styles.progressLabel}>{type.replace('_', ' ')}</Text>
-                <Text style={styles.progressValue}>{count} units</Text>
+          .map(([type, count]) => {
+            const percentage = Math.min(
+              (count / Math.max(...Object.values(stats.glassTypeCounts))) * 100,
+              100
+            );
+            return (
+              <View key={type} style={styles.progressRow}>
+                <View style={styles.progressHeader}>
+                  <Text style={styles.progressLabel}>{type.replace('_', ' ')}</Text>
+                  <Text style={styles.progressValue}>{count} units</Text>
+                </View>
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBarSuccess, { width: `${percentage}%` }]} />
+                </View>
               </View>
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${Math.min(
-                        (count /
-                          Math.max(...Object.values(stats.glassTypeCounts))) *
-                          100,
-                        100
-                      )}%`,
-                      backgroundColor: Colors.success,
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          ))}
+            );
+          })}
 
         {Object.keys(stats.glassTypeCounts).length === 0 && (
           <Text style={styles.emptyText}>No glass data yet</Text>
@@ -304,10 +273,66 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginHorizontal: 6,
   },
+  metricCardPrimary: {
+    width: '50%',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    marginHorizontal: 6,
+    backgroundColor: Colors.primary + '15',
+  },
+  metricCardSuccess: {
+    width: '50%',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    marginHorizontal: 6,
+    backgroundColor: Colors.success + '15',
+  },
+  metricCardAccent: {
+    width: '50%',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    marginHorizontal: 6,
+    backgroundColor: Colors.accent + '15',
+  },
+  metricCardInfo: {
+    width: '50%',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    marginHorizontal: 6,
+    backgroundColor: Colors.info + '15',
+  },
   metricValue: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
+  },
+  metricValuePrimary: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: Colors.primary,
+  },
+  metricValueSuccess: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: Colors.success,
+  },
+  metricValueAccent: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: Colors.accent,
+  },
+  metricValueInfo: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+    color: Colors.info,
   },
   metricLabel: {
     fontSize: 12,
@@ -326,6 +351,48 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     marginRight: 12,
+  },
+  statusDotDRAFT: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+    backgroundColor: Colors.draft,
+  },
+  statusDotQUOTED: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+    backgroundColor: Colors.quoted,
+  },
+  statusDotAPPROVED: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+    backgroundColor: Colors.approved,
+  },
+  statusDotINPROGRESS: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+    backgroundColor: Colors.inProgress,
+  },
+  statusDotCOMPLETED: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+    backgroundColor: Colors.completed,
+  },
+  statusDotCANCELLED: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+    backgroundColor: Colors.cancelled,
   },
   statsLabel: {
     flex: 1,
@@ -365,6 +432,16 @@ const styles = StyleSheet.create({
   progressBar: {
     height: '100%',
     borderRadius: 4,
+  },
+  progressBarPrimary: {
+    height: '100%',
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
+  },
+  progressBarSuccess: {
+    height: '100%',
+    borderRadius: 4,
+    backgroundColor: Colors.success,
   },
   emptyText: {
     fontSize: 14,
