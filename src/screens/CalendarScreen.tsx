@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar } from 'react-native-calendars';
@@ -6,6 +6,7 @@ import { Colors } from '../constants';
 import { useJobStorage } from '../hooks';
 import { formatCalendarDate, formatDisplayDate } from '../utils';
 import { Job, WorkflowStatus } from '../types';
+import { SkeletonLoader } from '../components/shared';
 
 type DateEvent = {
   job: Job;
@@ -17,6 +18,16 @@ type DateEvent = {
 const CalendarScreen = ({ navigation }: any) => {
   const { jobs } = useJobStorage();
   const [selectedDate, setSelectedDate] = useState(formatCalendarDate(new Date()));
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading to show skeleton briefly
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Create marked dates from workflow dates
   const markedDates = useMemo(() => {
@@ -120,144 +131,198 @@ const CalendarScreen = ({ navigation }: any) => {
       </View>
 
       <ScrollView style={styles.scrollView}>
-        <View style={styles.calendarSection}>
-          <View style={styles.legendContainer}>
-            <View style={styles.legendItem}>
-              <View style={styles.legendDotInfo} />
-              <Text style={styles.legendText}>Appointment</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={styles.legendDotSuccess} />
-              <Text style={styles.legendText}>Installation</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={styles.legendDotWarning} />
-              <Text style={styles.legendText}>Follow-up</Text>
-            </View>
-          </View>
-        <Calendar
-          current={selectedDate}
-          onDayPress={(day: any) => setSelectedDate(day.dateString)}
-          markedDates={markedDates}
-          markingType="multi-dot"
-          theme={{
-            backgroundColor: Colors.background,
-            calendarBackground: Colors.background,
-            textSectionTitleColor: Colors.textSecondary,
-            selectedDayBackgroundColor: Colors.primary,
-            selectedDayTextColor: Colors.background,
-            todayTextColor: Colors.primary,
-            dayTextColor: Colors.text,
-            textDisabledColor: Colors.textLight,
-            dotColor: Colors.primary,
-            selectedDotColor: Colors.background,
-            arrowColor: Colors.primary,
-            monthTextColor: Colors.text,
-            indicatorColor: Colors.primary,
-            textDayFontWeight: '500',
-            textMonthFontWeight: 'bold',
-            textDayHeaderFontWeight: '600',
-            textDayFontSize: 16,
-            textMonthFontSize: 18,
-            textDayHeaderFontSize: 14,
-          }}
-        />
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          Events on {formatDisplayDate(selectedDate)}
-        </Text>
-
-        {selectedDateEvents.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No events scheduled for this date</Text>
-            <Text style={styles.emptySubtext}>
-              Appointments, follow-ups, and installations will appear here
-            </Text>
-          </View>
-        ) : (
-          selectedDateEvents.map((event, index) => (
-            <TouchableOpacity
-              key={`${event.job.id}-${event.type}-${index}`}
-              style={styles.eventCard}
-              onPress={() => handleJobPress(event.job.id)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.eventIndicator, (styles as any)[`eventIndicator${event.type.charAt(0).toUpperCase() + event.type.slice(1)}`]]} />
-
-              <View style={styles.eventContent}>
-                <View style={styles.eventHeader}>
-                  <Text style={styles.eventType}>{event.label}</Text>
-                  <Text style={styles.jobNumber}>{event.job.jobNumber}</Text>
-                </View>
-
-                <Text style={styles.customerName}>{event.job.customer.name}</Text>
-                <Text style={styles.customerAddress}>
-                  {event.job.customer.address}, {event.job.customer.city}
-                </Text>
-                <Text style={styles.customerPhone}>{event.job.customer.phone}</Text>
-
-                <View style={styles.eventFooter}>
-                  <View style={(styles as any)[`statusBadge${event.job.status.replace(/_/g, '')}`] || styles.statusBadge}>
-                    <Text style={styles.statusText}>{event.job.status}</Text>
+        {loading ? (
+          <>
+            {/* Calendar Skeleton */}
+            <View style={styles.calendarSection}>
+              {/* Legend skeleton */}
+              <View style={styles.legendContainer}>
+                {[1, 2, 3].map(i => (
+                  <View key={i} style={styles.legendItem}>
+                    <SkeletonLoader width={8} height={8} borderRadius={4} />
+                    <SkeletonLoader width={80} height={12} borderRadius={4} />
                   </View>
+                ))}
+              </View>
+              {/* Calendar skeleton */}
+              <View style={{ padding: 16 }}>
+                <SkeletonLoader width={150} height={20} borderRadius={4} style={{ marginBottom: 16, alignSelf: 'center' }} />
+                <SkeletonLoader width="100%" height={300} borderRadius={8} />
+              </View>
+            </View>
 
-                  {event.job.workflowStatus && event.job.workflowStatus !== 'NONE' && (
-                    <View style={[
-                      styles.workflowBadge,
-                      event.type === 'appointment' && styles.workflowBadgeAppointment,
-                      event.type === 'followup' && styles.workflowBadgeFollowup,
-                      event.type === 'install' && styles.workflowBadgeInstall
-                    ]}>
-                      <Text style={styles.workflowText}>
-                        {event.job.workflowStatus.replace(/_/g, ' ')}
-                      </Text>
-                    </View>
-                  )}
+            {/* Events skeleton */}
+            <View style={styles.section}>
+              <SkeletonLoader width={200} height={18} borderRadius={4} style={{ marginBottom: 16 }} />
+              {[1, 2, 3].map(i => (
+                <View key={i} style={[styles.eventCard, { marginBottom: 12 }]}>
+                  <SkeletonLoader width={4} height={100} />
+                  <View style={{ flex: 1, padding: 16 }}>
+                    <SkeletonLoader width={120} height={16} borderRadius={4} style={{ marginBottom: 8 }} />
+                    <SkeletonLoader width="90%" height={20} borderRadius={4} style={{ marginBottom: 8 }} />
+                    <SkeletonLoader width="70%" height={14} borderRadius={4} />
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            {/* Stats skeleton */}
+            <View style={styles.section}>
+              <SkeletonLoader width={150} height={18} borderRadius={4} style={{ marginBottom: 16 }} />
+              <View style={styles.statsGrid}>
+                {[1, 2, 3, 4].map(i => (
+                  <View key={i} style={styles.statCard}>
+                    <SkeletonLoader width={60} height={32} borderRadius={4} style={{ marginBottom: 8, alignSelf: 'center' }} />
+                    <SkeletonLoader width={80} height={12} borderRadius={4} style={{ alignSelf: 'center' }} />
+                  </View>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.bottomSpacer} />
+          </>
+        ) : (
+          <>
+            <View style={styles.calendarSection}>
+              <View style={styles.legendContainer}>
+                <View style={styles.legendItem}>
+                  <View style={styles.legendDotInfo} />
+                  <Text style={styles.legendText}>Appointment</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={styles.legendDotSuccess} />
+                  <Text style={styles.legendText}>Installation</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={styles.legendDotWarning} />
+                  <Text style={styles.legendText}>Follow-up</Text>
                 </View>
               </View>
-            </TouchableOpacity>
-          ))
+            <Calendar
+              current={selectedDate}
+              onDayPress={(day: any) => setSelectedDate(day.dateString)}
+              markedDates={markedDates}
+              markingType="multi-dot"
+              theme={{
+                backgroundColor: Colors.background,
+                calendarBackground: Colors.background,
+                textSectionTitleColor: Colors.textSecondary,
+                selectedDayBackgroundColor: Colors.primary,
+                selectedDayTextColor: Colors.background,
+                todayTextColor: Colors.primary,
+                dayTextColor: Colors.text,
+                textDisabledColor: Colors.textLight,
+                dotColor: Colors.primary,
+                selectedDotColor: Colors.background,
+                arrowColor: Colors.primary,
+                monthTextColor: Colors.text,
+                indicatorColor: Colors.primary,
+                textDayFontWeight: '500',
+                textMonthFontWeight: 'bold',
+                textDayHeaderFontWeight: '600',
+                textDayFontSize: 16,
+                textMonthFontSize: 18,
+                textDayHeaderFontSize: 14,
+              }}
+            />
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Events on {formatDisplayDate(selectedDate)}
+            </Text>
+
+            {selectedDateEvents.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>No events scheduled for this date</Text>
+                <Text style={styles.emptySubtext}>
+                  Appointments, follow-ups, and installations will appear here
+                </Text>
+              </View>
+            ) : (
+              selectedDateEvents.map((event, index) => (
+                <TouchableOpacity
+                  key={`${event.job.id}-${event.type}-${index}`}
+                  style={styles.eventCard}
+                  onPress={() => handleJobPress(event.job.id)}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.eventIndicator, (styles as any)[`eventIndicator${event.type.charAt(0).toUpperCase() + event.type.slice(1)}`]]} />
+
+                  <View style={styles.eventContent}>
+                    <View style={styles.eventHeader}>
+                      <Text style={styles.eventType}>{event.label}</Text>
+                      <Text style={styles.jobNumber}>{event.job.jobNumber}</Text>
+                    </View>
+
+                    <Text style={styles.customerName}>{event.job.customer.name}</Text>
+                    <Text style={styles.customerAddress}>
+                      {event.job.customer.address}, {event.job.customer.city}
+                    </Text>
+                    <Text style={styles.customerPhone}>{event.job.customer.phone}</Text>
+
+                    <View style={styles.eventFooter}>
+                      <View style={(styles as any)[`statusBadge${event.job.status.replace(/_/g, '')}`] || styles.statusBadge}>
+                        <Text style={styles.statusText}>{event.job.status}</Text>
+                      </View>
+
+                      {event.job.workflowStatus && event.job.workflowStatus !== 'NONE' && (
+                        <View style={[
+                          styles.workflowBadge,
+                          event.type === 'appointment' && styles.workflowBadgeAppointment,
+                          event.type === 'followup' && styles.workflowBadgeFollowup,
+                          event.type === 'install' && styles.workflowBadgeInstall
+                        ]}>
+                          <Text style={styles.workflowText}>
+                            {event.job.workflowStatus.replace(/_/g, ' ')}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
+          </View>
+
+          {/* Summary Stats */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Calendar Summary</Text>
+
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <Text style={styles.statValueInfo}>
+                  {jobs.filter(j => j.appointmentDate).length}
+                </Text>
+                <Text style={styles.statLabel}>Appointments</Text>
+              </View>
+
+              <View style={styles.statCard}>
+                <Text style={styles.statValueSuccess}>
+                  {jobs.filter(j => j.installDate).length}
+                </Text>
+                <Text style={styles.statLabel}>Installations</Text>
+              </View>
+
+              <View style={styles.statCard}>
+                <Text style={styles.statValueWarning}>
+                  {jobs.filter(j => j.followUpDate).length}
+                </Text>
+                <Text style={styles.statLabel}>Follow-ups</Text>
+              </View>
+
+              <View style={styles.statCard}>
+                <Text style={styles.statValuePrimary}>
+                  {jobs.filter(j => j.status === 'IN_PROGRESS').length}
+                </Text>
+                <Text style={styles.statLabel}>In Progress</Text>
+              </View>
+            </View>
+          </View>
+
+            <View style={styles.bottomSpacer} />
+          </>
         )}
-      </View>
-
-      {/* Summary Stats */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Calendar Summary</Text>
-
-        <View style={styles.statsGrid}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValueInfo}>
-              {jobs.filter(j => j.appointmentDate).length}
-            </Text>
-            <Text style={styles.statLabel}>Appointments</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statValueSuccess}>
-              {jobs.filter(j => j.installDate).length}
-            </Text>
-            <Text style={styles.statLabel}>Installations</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statValueWarning}>
-              {jobs.filter(j => j.followUpDate).length}
-            </Text>
-            <Text style={styles.statLabel}>Follow-ups</Text>
-          </View>
-
-          <View style={styles.statCard}>
-            <Text style={styles.statValuePrimary}>
-              {jobs.filter(j => j.status === 'IN_PROGRESS').length}
-            </Text>
-            <Text style={styles.statLabel}>In Progress</Text>
-          </View>
-        </View>
-      </View>
-
-        <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
   );

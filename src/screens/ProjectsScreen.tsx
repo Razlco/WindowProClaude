@@ -17,7 +17,7 @@ import { Colors } from '../constants';
 import { Job, JobStatus, WorkflowStatus } from '../types';
 import StorageService from '../services/StorageService';
 import { SwipeableProjectCard, CollapsibleSection } from '../components/projects';
-import DatePickerModal from '../components/shared/DatePickerModal';
+import { DatePickerModal, ProjectCardSkeleton } from '../components/shared';
 
 type ViewMode = 'compact' | 'detailed';
 type DatePickerType = 'appointment' | 'followup' | 'install';
@@ -479,9 +479,11 @@ const ProjectsScreen = ({ navigation }: any) => {
 
       {/* Projects List */}
       {loading ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>Loading projects...</Text>
-        </View>
+        <ScrollView style={styles.groupedContainer} contentContainerStyle={styles.listContent}>
+          {[1, 2, 3, 4, 5].map((item) => (
+            <ProjectCardSkeleton key={item} viewMode={viewMode} />
+          ))}
+        </ScrollView>
       ) : filteredJobs.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateIcon}>📁</Text>

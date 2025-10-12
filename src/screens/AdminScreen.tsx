@@ -1,12 +1,23 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants';
 import { useJobStorage } from '../hooks';
 import { formatCurrency } from '../utils';
+import { DashboardSkeleton, SkeletonLoader } from '../components/shared';
 
 const AdminScreen = ({ navigation }: any) => {
   const { jobs } = useJobStorage();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading to show skeleton briefly
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -57,6 +68,17 @@ const AdminScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView style={styles.scrollView}>
+      {loading ? (
+        <>
+          {/* Header Skeleton */}
+          <View style={styles.header}>
+            <SkeletonLoader width={150} height={28} borderRadius={4} style={{ marginBottom: 4 }} />
+            <SkeletonLoader width={200} height={14} borderRadius={4} />
+          </View>
+          <DashboardSkeleton />
+        </>
+      ) : (
+        <>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Dashboard</Text>
@@ -221,6 +243,8 @@ const AdminScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.bottomSpacer} />
+        </>
+      )}
       </ScrollView>
     </SafeAreaView>
   );
