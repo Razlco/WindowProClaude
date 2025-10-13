@@ -10,6 +10,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -54,6 +55,21 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
   const [hingePlacement, setHingePlacement] = useState<'LEFT' | 'RIGHT' | undefined>(undefined);
   const [notes, setNotes] = useState('');
 
+  // Pricing options state
+  const [paneCount, setPaneCount] = useState<'SINGLE' | 'DOUBLE' | 'TRIPLE'>('DOUBLE');
+  const [glassStrength, setGlassStrength] = useState<'SINGLE' | 'DOUBLE' | 'TRIPLE'>('SINGLE');
+  const [hasLaminate, setHasLaminate] = useState(false);
+  const [hasTempered, setHasTempered] = useState(false);
+  const [hasTinted, setHasTinted] = useState(false);
+  const [hasGrids, setHasGrids] = useState(false);
+  const [gridPattern, setGridPattern] = useState('');
+  const [hasInstallation, setHasInstallation] = useState(false);
+  const [customPrice, setCustomPrice] = useState('');
+
+  // Door-specific pricing
+  const [sidelightCount, setSidelightCount] = useState('0');
+  const [sidelightType, setSidelightType] = useState<'FULL' | 'HALF' | 'NONE'>('FULL');
+
   const resetForm = () => {
     setWidth('');
     setHeight('');
@@ -64,6 +80,18 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     setFrameType(undefined);
     setHingePlacement(undefined);
     setNotes('');
+    // Reset pricing options
+    setPaneCount('DOUBLE');
+    setGlassStrength('SINGLE');
+    setHasLaminate(false);
+    setHasTempered(false);
+    setHasTinted(false);
+    setHasGrids(false);
+    setGridPattern('');
+    setHasInstallation(false);
+    setCustomPrice('');
+    setSidelightCount('0');
+    setSidelightType('FULL');
   };
 
   const handleCategorySelect = (category: 'WINDOW' | 'DOOR' | 'GLASS') => {
@@ -469,6 +497,262 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                       </Text>
                     </TouchableOpacity>
                   ))}
+                </View>
+              </View>
+
+              {/* PRICING OPTIONS */}
+              <View style={styles.pricingSection}>
+                <Text style={styles.pricingSectionTitle}>💰 Pricing Options</Text>
+
+                {/* Pane Count */}
+                <View style={styles.compactInputGroup}>
+                  <Text style={styles.label}>Pane Count *</Text>
+                  <View style={styles.chipContainer}>
+                    <TouchableOpacity
+                      style={[styles.chip, paneCount === 'SINGLE' && styles.chipSelected]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setPaneCount('SINGLE');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.chipText, paneCount === 'SINGLE' && styles.chipTextSelected]}>
+                        Single
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.chip, paneCount === 'DOUBLE' && styles.chipSelected]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setPaneCount('DOUBLE');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.chipText, paneCount === 'DOUBLE' && styles.chipTextSelected]}>
+                        Double
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.chip, paneCount === 'TRIPLE' && styles.chipSelected]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setPaneCount('TRIPLE');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.chipText, paneCount === 'TRIPLE' && styles.chipTextSelected]}>
+                        Triple
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Glass Strength */}
+                <View style={styles.compactInputGroup}>
+                  <Text style={styles.label}>Glass Strength *</Text>
+                  <View style={styles.chipContainer}>
+                    <TouchableOpacity
+                      style={[styles.chip, glassStrength === 'SINGLE' && styles.chipSelected]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setGlassStrength('SINGLE');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.chipText, glassStrength === 'SINGLE' && styles.chipTextSelected]}>
+                        Single
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.chip, glassStrength === 'DOUBLE' && styles.chipSelected]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setGlassStrength('DOUBLE');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.chipText, glassStrength === 'DOUBLE' && styles.chipTextSelected]}>
+                        Double
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.chip, glassStrength === 'TRIPLE' && styles.chipSelected]}
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setGlassStrength('TRIPLE');
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.chipText, glassStrength === 'TRIPLE' && styles.chipTextSelected]}>
+                        Triple
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Glass Options (2-column layout) */}
+                <View style={styles.toggleGrid}>
+                  <View style={styles.toggleRow}>
+                    <Text style={styles.toggleLabel}>Laminate</Text>
+                    <Switch
+                      value={hasLaminate}
+                      onValueChange={(value) => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setHasLaminate(value);
+                      }}
+                      trackColor={{ false: Colors.border, true: Colors.primaryLight }}
+                      thumbColor={hasLaminate ? Colors.primary : Colors.backgroundGray}
+                    />
+                  </View>
+                  <View style={styles.toggleRow}>
+                    <Text style={styles.toggleLabel}>Tempered</Text>
+                    <Switch
+                      value={hasTempered}
+                      onValueChange={(value) => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setHasTempered(value);
+                      }}
+                      trackColor={{ false: Colors.border, true: Colors.primaryLight }}
+                      thumbColor={hasTempered ? Colors.primary : Colors.backgroundGray}
+                    />
+                  </View>
+                </View>
+
+                <View style={styles.toggleGrid}>
+                  <View style={styles.toggleRow}>
+                    <Text style={styles.toggleLabel}>Tinted</Text>
+                    <Switch
+                      value={hasTinted}
+                      onValueChange={(value) => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setHasTinted(value);
+                      }}
+                      trackColor={{ false: Colors.border, true: Colors.primaryLight }}
+                      thumbColor={hasTinted ? Colors.primary : Colors.backgroundGray}
+                    />
+                  </View>
+                  <View style={styles.toggleRow}>
+                    <Text style={styles.toggleLabel}>Installation</Text>
+                    <Switch
+                      value={hasInstallation}
+                      onValueChange={(value) => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setHasInstallation(value);
+                      }}
+                      trackColor={{ false: Colors.border, true: Colors.primaryLight }}
+                      thumbColor={hasInstallation ? Colors.primary : Colors.backgroundGray}
+                    />
+                  </View>
+                </View>
+
+                {/* Grids with Pattern */}
+                <View style={styles.toggleRow}>
+                  <Text style={styles.toggleLabel}>Grids</Text>
+                  <Switch
+                    value={hasGrids}
+                    onValueChange={(value) => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setHasGrids(value);
+                      if (!value) setGridPattern('');
+                    }}
+                    trackColor={{ false: Colors.border, true: Colors.primaryLight }}
+                    thumbColor={hasGrids ? Colors.primary : Colors.backgroundGray}
+                  />
+                </View>
+                {hasGrids && (
+                  <View style={styles.compactInputGroup}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Grid pattern (e.g., Colonial, Prairie)"
+                      value={gridPattern}
+                      onChangeText={setGridPattern}
+                    />
+                  </View>
+                )}
+
+                {/* Sidelights for DOORS only */}
+                {selectedCategory === 'DOOR' && (
+                  <>
+                    <View style={styles.divider} />
+                    <Text style={styles.subsectionLabel}>Sidelights</Text>
+                    <View style={styles.row}>
+                      <View style={[styles.inputGroup, styles.flex1]}>
+                        <Text style={styles.label}>Count</Text>
+                        <TextInput
+                          style={styles.input}
+                          placeholder="0"
+                          value={sidelightCount}
+                          onChangeText={setSidelightCount}
+                          keyboardType="number-pad"
+                        />
+                      </View>
+                      <View style={[styles.inputGroup, styles.flex1, styles.marginLeft]}>
+                        <Text style={styles.label}>Type</Text>
+                        <View style={styles.chipContainer}>
+                          <TouchableOpacity
+                            style={[styles.chip, sidelightType === 'FULL' && styles.chipSelected]}
+                            onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              setSidelightType('FULL');
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={[styles.chipText, sidelightType === 'FULL' && styles.chipTextSelected]}>
+                              Full
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.chip, sidelightType === 'HALF' && styles.chipSelected]}
+                            onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              setSidelightType('HALF');
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={[styles.chipText, sidelightType === 'HALF' && styles.chipTextSelected]}>
+                              Half
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={[styles.chip, sidelightType === 'NONE' && styles.chipSelected]}
+                            onPress={() => {
+                              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                              setSidelightType('NONE');
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <Text style={[styles.chipText, sidelightType === 'NONE' && styles.chipTextSelected]}>
+                              None
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </>
+                )}
+
+                {/* Price Preview */}
+                <View style={styles.pricePreview}>
+                  <Text style={styles.pricePreviewLabel}>Estimated Price:</Text>
+                  <Text style={styles.pricePreviewValue}>
+                    {/* TODO: Backend developer - Calculate price based on all options */}
+                    $0.00
+                  </Text>
+                </View>
+
+                {/* Custom Price Override */}
+                <View style={styles.compactInputGroup}>
+                  <Text style={styles.label}>Custom Price Override (optional)</Text>
+                  <View style={styles.priceInputContainer}>
+                    <Text style={styles.currencySymbol}>$</Text>
+                    <TextInput
+                      style={styles.priceInputField}
+                      placeholder="Leave blank for auto-calc"
+                      value={customPrice}
+                      onChangeText={setCustomPrice}
+                      keyboardType="decimal-pad"
+                    />
+                  </View>
                 </View>
               </View>
 
@@ -912,6 +1196,101 @@ const styles = StyleSheet.create({
     color: Colors.background,
     fontSize: 14,
     fontWeight: '600',
+  },
+  pricingSection: {
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: Colors.primary + '30',
+  },
+  pricingSectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  compactInputGroup: {
+    marginBottom: 12,
+  },
+  toggleGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    gap: 8,
+  },
+  toggleRow: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: Colors.backgroundGray,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  toggleLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.text,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginVertical: 12,
+  },
+  subsectionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  pricePreview: {
+    backgroundColor: Colors.primaryLight + '20',
+    padding: 16,
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  pricePreviewLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  pricePreviewValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.primary,
+  },
+  priceInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: 12,
+  },
+  currencySymbol: {
+    fontSize: 16,
+    color: Colors.text,
+    marginRight: 4,
+    fontWeight: '600',
+  },
+  priceInputField: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.text,
+    padding: 12,
   },
 });
 
