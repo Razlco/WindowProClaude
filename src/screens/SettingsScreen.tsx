@@ -10,6 +10,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -26,6 +27,17 @@ const SettingsScreen = ({ navigation }: any) => {
   const [enableNotifications, setEnableNotifications] = useState(true);
   const [autosave, setAutosave] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+
+  // PDF Pricing Options
+  const [pdfDetailedPricing, setPdfDetailedPricing] = useState(true);
+
+  // Multi-tax rate management
+  const [taxRates, setTaxRates] = useState<Array<{id: string, name: string, rate: number, isDefault: boolean}>>([
+    { id: '1', name: 'Default', rate: 8.0, isDefault: true },
+  ]);
+
+  // Company branding
+  const [companyLogo, setCompanyLogo] = useState<string | null>(null);
 
   // Bluetooth state
   const [isScanning, setIsScanning] = useState(false);
@@ -118,6 +130,74 @@ const SettingsScreen = ({ navigation }: any) => {
     );
   };
 
+  const handleUploadLogo = async () => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+      // TODO: Backend developer - Implement expo-image-picker for logo selection
+      // import * as ImagePicker from 'expo-image-picker';
+      //
+      // const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      // if (status !== 'granted') {
+      //   Alert.alert('Permission Denied', 'Camera roll permissions are required to upload a logo.');
+      //   return;
+      // }
+      //
+      // const result = await ImagePicker.launchImageLibraryAsync({
+      //   mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      //   allowsEditing: true,
+      //   aspect: [4, 3],
+      //   quality: 0.8,
+      // });
+      //
+      // if (!result.canceled) {
+      //   // Upload to Supabase Storage
+      //   const { data, error } = await supabase.storage
+      //     .from('company-logos')
+      //     .upload(`${userId}/logo.png`, {
+      //       uri: result.assets[0].uri,
+      //       type: 'image/png',
+      //       name: 'logo.png',
+      //     });
+      //
+      //   if (error) throw error;
+      //
+      //   setCompanyLogo(result.assets[0].uri);
+      //   Alert.alert('Success', 'Company logo uploaded successfully!');
+      // }
+
+      // Temporary: Simulate upload for UI demonstration
+      setTimeout(() => {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setCompanyLogo('https://via.placeholder.com/150');
+        Alert.alert('Success', 'Logo uploaded successfully!\n\n(Demo mode - backend not connected)');
+      }, 1000);
+    } catch (error: any) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert('Error', error.message || 'Failed to upload logo. Please try again.');
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    Alert.alert(
+      'Remove Logo',
+      'Are you sure you want to remove your company logo?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            // TODO: Backend developer - Delete from Supabase Storage
+            setCompanyLogo(null);
+            Alert.alert('Logo Removed', 'Your company logo has been removed.');
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.wrapper} edges={['top']}>
       {/* Header with back button */}
@@ -138,9 +218,67 @@ const SettingsScreen = ({ navigation }: any) => {
         style={styles.keyboardAvoid}
       >
         <ScrollView style={styles.container}>
+        {/* Subscription & Billing */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Subscription & Billing</Text>
+
+        <View style={styles.infoBox}>
+          <Text style={styles.infoText}>
+            💼 Manage your subscription plan, billing details, and payment methods
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate('Subscription');
+          }}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.buttonText}>Manage Subscription</Text>
+        </TouchableOpacity>
+      </View>
+
         {/* Company Information */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Company Information</Text>
+
+        {/* Company Logo */}
+        <View style={styles.logoSection}>
+          <Text style={styles.label}>Company Logo</Text>
+          <View style={styles.logoContainer}>
+            {companyLogo ? (
+              <View style={styles.logoPreview}>
+                <Image source={{ uri: companyLogo }} style={styles.logoImage} />
+                <TouchableOpacity
+                  style={styles.removeLogoButton}
+                  onPress={handleRemoveLogo}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.removeLogoText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.logoPlaceholder}>
+                <Text style={styles.logoPlaceholderIcon}>🏢</Text>
+                <Text style={styles.logoPlaceholderText}>No logo uploaded</Text>
+              </View>
+            )}
+            <TouchableOpacity
+              style={[styles.button, styles.uploadButton]}
+              onPress={handleUploadLogo}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.buttonText}>
+                {companyLogo ? 'Change Logo' : 'Upload Logo'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.helperText}>
+            📸 Logo will appear on PDF estimates and invoices
+          </Text>
+        </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Company Name</Text>
@@ -190,21 +328,132 @@ const SettingsScreen = ({ navigation }: any) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Pricing Configuration</Text>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Default Tax Rate (%)</Text>
-          <TextInput
-            style={styles.input}
-            value={taxRate}
-            onChangeText={setTaxRate}
-            placeholder="8.0"
-            keyboardType="decimal-pad"
+        {/* PDF Pricing Options */}
+        <View style={styles.settingRow}>
+          <View style={styles.settingInfo}>
+            <Text style={styles.settingLabel}>PDF Detailed Pricing</Text>
+            <Text style={styles.settingDescription}>
+              {pdfDetailedPricing
+                ? 'Show line-by-line pricing on PDFs'
+                : 'Show only grand total on PDFs'}
+            </Text>
+          </View>
+          <Switch
+            value={pdfDetailedPricing}
+            onValueChange={(value) => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              setPdfDetailedPricing(value);
+            }}
+            trackColor={{ false: Colors.border, true: Colors.primaryLight }}
+            thumbColor={pdfDetailedPricing ? Colors.primary : Colors.backgroundGray}
           />
         </View>
 
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            Default pricing rules can be customized per product type and glass type.
-            Contact support for advanced pricing configuration.
+            📄 Detailed pricing shows materials, labor, and itemized costs per measurement.
+            Non-detailed pricing shows only the final total amount.
+          </Text>
+        </View>
+
+        {/* Multi-Tax Rate Management */}
+        <View style={styles.subsectionHeader}>
+          <Text style={styles.subsectionTitle}>Tax Rates</Text>
+        </View>
+
+        {taxRates.map((taxRate, index) => (
+          <View key={taxRate.id} style={styles.taxRateCard}>
+            <View style={styles.taxRateInfo}>
+              <Text style={styles.taxRateName}>
+                {taxRate.name}
+                {taxRate.isDefault && <Text style={styles.defaultBadge}> • DEFAULT</Text>}
+              </Text>
+              <Text style={styles.taxRateValue}>{taxRate.rate.toFixed(2)}%</Text>
+            </View>
+            {!taxRate.isDefault && (
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  Alert.alert(
+                    'Delete Tax Rate',
+                    `Remove ${taxRate.name}?`,
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Delete',
+                        style: 'destructive',
+                        onPress: () => {
+                          setTaxRates(taxRates.filter(tr => tr.id !== taxRate.id));
+                        },
+                      },
+                    ]
+                  );
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.deleteButtonText}>✕</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ))}
+
+        <TouchableOpacity
+          style={[styles.button, styles.buttonSecondary]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            Alert.prompt(
+              'Add Tax Rate',
+              'Enter tax rate name:',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Next',
+                  onPress: (name?: string) => {
+                    if (name) {
+                      Alert.prompt(
+                        'Add Tax Rate',
+                        'Enter tax rate percentage:',
+                        [
+                          { text: 'Cancel', style: 'cancel' },
+                          {
+                            text: 'Add',
+                            onPress: (rate?: string) => {
+                              const rateNum = parseFloat(rate || '0');
+                              if (rateNum > 0) {
+                                setTaxRates([
+                                  ...taxRates,
+                                  {
+                                    id: Date.now().toString(),
+                                    name: name,
+                                    rate: rateNum,
+                                    isDefault: false,
+                                  },
+                                ]);
+                              }
+                            },
+                          },
+                        ],
+                        'plain-text',
+                        '',
+                        'decimal-pad'
+                      );
+                    }
+                  },
+                },
+              ],
+              'plain-text'
+            );
+          }}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.buttonText, styles.buttonTextSecondary]}>+ Add Tax Rate</Text>
+        </TouchableOpacity>
+
+        <View style={styles.infoBox}>
+          <Text style={styles.infoText}>
+            💡 Add different tax rates for various locations or product types.
+            Select the applicable rate when creating estimates.
           </Text>
         </View>
 
@@ -642,6 +891,127 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
+  },
+  subsectionHeader: {
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  subsectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  taxRateCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: Colors.backgroundGray,
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  taxRateInfo: {
+    flex: 1,
+  },
+  taxRateName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  taxRateValue: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  defaultBadge: {
+    fontSize: 11,
+    color: Colors.success,
+    fontWeight: 'bold',
+  },
+  deleteButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.error,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 12,
+  },
+  deleteButtonText: {
+    color: Colors.background,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  helperText: {
+    color: Colors.textSecondary,
+    fontSize: 12,
+    marginTop: 6,
+  },
+  logoSection: {
+    marginBottom: 20,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  logoPreview: {
+    position: 'relative',
+    marginBottom: 12,
+  },
+  logoImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.border,
+  },
+  removeLogoButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.error,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  removeLogoText: {
+    color: Colors.background,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  logoPlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.border,
+    borderStyle: 'dashed',
+    backgroundColor: Colors.backgroundGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  logoPlaceholderIcon: {
+    fontSize: 40,
+    marginBottom: 8,
+  },
+  logoPlaceholderText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    fontWeight: '500',
+  },
+  uploadButton: {
+    width: 200,
   },
 });
 

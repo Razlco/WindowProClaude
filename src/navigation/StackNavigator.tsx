@@ -17,6 +17,8 @@ import NewJobScreen from '../screens/NewJobScreen';
 import MeasurementsScreen from '../screens/MeasurementsScreen';
 import JobDetailsScreen from '../screens/JobDetailsScreen';
 import AdminScreen from '../screens/AdminScreen';
+import SubscriptionScreen from '../screens/SubscriptionScreen';
+import EstimatePreviewScreen from '../screens/EstimatePreviewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -126,6 +128,20 @@ export const StackNavigator = () => {
         name="Admin"
         component={AdminScreen}
         options={{ title: 'Admin Panel' }}
+      />
+
+      {/* Subscription Screen - Billing & subscription management */}
+      <Stack.Screen
+        name="Subscription"
+        component={SubscriptionScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* Estimate Preview Screen - PDF generation and sending */}
+      <Stack.Screen
+        name="EstimatePreview"
+        component={EstimatePreviewScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
