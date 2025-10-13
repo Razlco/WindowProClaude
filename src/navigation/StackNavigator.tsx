@@ -2,6 +2,9 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Colors } from '../constants';
 
+// Import authentication screens
+import { LoginScreen, SignUpScreen, ForgotPasswordScreen } from '../screens/auth';
+
 // Import all screens
 import LandingScreen from '../screens/LandingScreen';
 import HomeMainScreen from '../screens/HomeMainScreen';
@@ -20,7 +23,7 @@ const Stack = createNativeStackNavigator();
 export const StackNavigator = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Landing"
+      initialRouteName="Login"
       screenOptions={{
         headerStyle: {
           backgroundColor: Colors.primary,
@@ -31,6 +34,23 @@ export const StackNavigator = () => {
         },
       }}
     >
+      {/* Authentication Screens */}
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SignUp"
+        component={SignUpScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ headerShown: false }}
+      />
+
       {/* Landing/Login Screen - First screen shown */}
       <Stack.Screen
         name="Landing"
