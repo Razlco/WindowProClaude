@@ -457,7 +457,14 @@ const SettingsScreen = ({ navigation }: any) => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.button} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate('PricingConfig');
+          }}
+          activeOpacity={0.7}
+        >
           <Text style={styles.buttonText}>Configure Pricing Rules</Text>
         </TouchableOpacity>
       </View>

@@ -19,6 +19,7 @@ import JobDetailsScreen from '../screens/JobDetailsScreen';
 import AdminScreen from '../screens/AdminScreen';
 import SubscriptionScreen from '../screens/SubscriptionScreen';
 import EstimatePreviewScreen from '../screens/EstimatePreviewScreen';
+import PricingConfigScreen from '../screens/PricingConfigScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -141,6 +142,13 @@ export const StackNavigator = () => {
       <Stack.Screen
         name="EstimatePreview"
         component={EstimatePreviewScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* Pricing Config Screen - Comprehensive pricing configuration */}
+      <Stack.Screen
+        name="PricingConfig"
+        component={PricingConfigScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
