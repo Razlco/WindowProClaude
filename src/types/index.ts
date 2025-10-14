@@ -79,6 +79,34 @@ export enum WorkflowStatus {
   FOLLOW_UP_NEEDED = 'FOLLOW_UP_NEEDED',
 }
 
+export enum ChangeReason {
+  MISTAKE = 'I made a mistake',
+  CUSTOMER_LAYOUT_CHANGE = 'Customer changed window layout',
+  INSTALLER_CORRECTION = 'Installer corrected measurements',
+  CUSTOMER_ADDED_WINDOWS = 'Customer added windows',
+}
+
+export interface MeasurementChangeLog {
+  id: string;
+  jobId: string;
+  measurementId: string;
+  changedBy: string; // User ID
+  changedByName: string; // User display name
+  changedAt: Date;
+  previousValue: Measurement;
+  newValue: Measurement;
+  reason: ChangeReason;
+  reasonNotes?: string; // Additional context
+  approvedBy?: string; // Manager/Admin ID
+  approvedByName?: string;
+  approvedAt?: Date;
+  installerApprovalRequired: boolean; // True if reason is INSTALLER_CORRECTION
+  installerApprovedBy?: string;
+  installerApprovedByName?: string;
+  installerApprovedAt?: Date;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
 export interface Job {
   id: string;
   jobNumber: string; // Auto-generated format: YYYYMMDD-XXX
@@ -96,6 +124,11 @@ export interface Job {
   pricing: JobPricing;
   notes?: string;
   signatureDataUrl?: string;
+  measurementsLocked: boolean; // Locked when status changes from DRAFT to QUOTED
+  lockedAt?: Date;
+  lockedBy?: string; // User ID who locked
+  lockedByName?: string;
+  changeLog: MeasurementChangeLog[]; // Track all measurement changes
   createdAt: Date;
   updatedAt: Date;
 }

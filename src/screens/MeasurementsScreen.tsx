@@ -251,6 +251,8 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
         measurements,
         status: JobStatus.DRAFT,
         pricing,
+        measurementsLocked: false, // Jobs start unlocked in DRAFT status
+        changeLog: [], // Empty change log for new jobs
         createdAt: new Date(),
         updatedAt: new Date(),
       };
