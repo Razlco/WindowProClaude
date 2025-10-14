@@ -67,10 +67,10 @@ const LoginScreen = ({ navigation }: any) => {
       // Navigate to main app
       // navigation.replace('Tabs');
 
-      // Temporary: Navigate to tabs for testing
+      // Temporary: Navigate to HomeMain for testing
       setTimeout(() => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        navigation.replace('Tabs');
+        navigation.replace('HomeMain');
       }, 1000);
     } catch (error: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

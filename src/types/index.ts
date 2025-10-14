@@ -121,6 +121,10 @@ export interface Job {
   followUpDate?: Date; // For follow-up reminders
   installDate?: Date; // For installation scheduling
   workOrderNumber?: string; // For scheduled installs
+  workOrderScopeOfWork?: string; // Detailed description of work to be completed
+  workOrderMaterialsRequired?: string; // List of materials needed
+  workOrderSpecialInstructions?: string; // Special notes, access codes, safety info
+  workOrderEstimatedDuration?: string; // How long the job will take
   pricing: JobPricing;
   notes?: string;
   signatureDataUrl?: string;

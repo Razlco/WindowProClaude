@@ -3,3 +3,5 @@ export * from './MeasurementChangeModal';
 export * from './MeasurementApprovalModal';
 export * from './MeasurementChangeLog';
 export * from './LockIndicator';
+export * from './WorkOrderModal';
+export * from './WorkOrderDisplay';
