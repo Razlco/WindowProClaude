@@ -57,7 +57,10 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
   const [depth, setDepth] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [productType, setProductType] = useState<ProductType>(DEFAULT_MEASUREMENT.productType);
-  const [glassType, setGlassType] = useState<GlassType>(DEFAULT_MEASUREMENT.glassType);
+  const [selectedGlassTypes, setSelectedGlassTypes] = useState<GlassType[]>([
+    GlassType.DOUBLE_PANE,
+    GlassType.DOUBLE_STRENGTH
+  ]);
   const [frameType, setFrameType] = useState<FrameType | undefined>(undefined);
   const [hingePlacement, setHingePlacement] = useState<'LEFT' | 'RIGHT' | undefined>(undefined);
   const [notes, setNotes] = useState('');
@@ -83,7 +86,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     setDepth('');
     setQuantity('1');
     setProductType(DEFAULT_MEASUREMENT.productType);
-    setGlassType(DEFAULT_MEASUREMENT.glassType);
+    setSelectedGlassTypes([GlassType.DOUBLE_PANE, GlassType.DOUBLE_STRENGTH]);
     setFrameType(undefined);
     setHingePlacement(undefined);
     setNotes('');
@@ -154,15 +157,20 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
       return;
     }
 
-    // Check if tempered glass should be suggested
-    const shouldSuggestTempered = checkTemperedGlassRequirement(widthNum, heightNum);
-    const isNotTempered = glassType !== GlassType.TEMPERED;
+    if (selectedGlassTypes.length === 0) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert('Validation Error', 'Please select at least one glass type');
+      return;
+    }
 
-    if (shouldSuggestTempered && isNotTempered) {
+    // Check if tempered glass should be suggested based on size
+    const shouldSuggestTempered = checkTemperedGlassRequirement(widthNum, heightNum);
+
+    if (shouldSuggestTempered && !hasTempered) {
       const squareFeet = ((widthNum * heightNum) / 144).toFixed(1);
       Alert.alert(
         'Building Code Notice',
-        `This glass is ${squareFeet} sq ft, which is 9 sq ft or larger.\n\nBuilding codes typically require tempered glass for:\n• Glass 9+ sq ft\n• Within 18" of the floor\n• Within 36" of a walkway\n\nWould you like to change this to tempered glass?`,
+        `This glass is ${squareFeet} sq ft, which is 9 sq ft or larger.\n\nBuilding codes typically require tempered glass for:\n• Glass 9+ sq ft\n• Within 18" of the floor\n• Within 36" of a walkway\n\nWould you like to enable tempered glass?`,
         [
           {
             text: 'No, Keep Current',
@@ -174,8 +182,8 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
           {
             text: 'Yes, Use Tempered',
             onPress: () => {
-              setGlassType(GlassType.TEMPERED);
-              addMeasurement(widthNum, heightNum, quantityNum, GlassType.TEMPERED);
+              setHasTempered(true);
+              addMeasurement(widthNum, heightNum, quantityNum, true);
             },
           },
         ]
@@ -189,7 +197,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     widthNum: number,
     heightNum: number,
     quantityNum: number,
-    overrideGlassType?: GlassType
+    overrideTempered?: boolean
   ) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
@@ -200,9 +208,19 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
       depth: depth ? parseFloat(depth) : undefined,
       quantity: quantityNum,
       productType,
-      glassType: overrideGlassType || glassType,
+      glassTypes: selectedGlassTypes,
       frameType,
       hingePlacement,
+      // Pricing options
+      hasTempered: overrideTempered !== undefined ? overrideTempered : hasTempered,
+      hasLaminate,
+      hasTinted,
+      hasGrids,
+      gridPattern: hasGrids ? gridPattern : undefined,
+      hasInstallation,
+      customPrice: customPrice ? parseFloat(customPrice) : undefined,
+      sidelightCount: selectedCategory === 'DOOR' ? parseInt(sidelightCount) : undefined,
+      sidelightType: selectedCategory === 'DOOR' ? sidelightType : undefined,
       notes: notes.trim() || undefined,
       measuredAt: new Date(),
     };
@@ -484,77 +502,94 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Glass Type *</Text>
+                <Text style={styles.label}>Glass Type * (Select all that apply)</Text>
                 <View style={styles.chipContainer}>
-                  {Object.values(GlassType).map((type) => (
-                    <TouchableOpacity
-                      key={type}
-                      style={[
-                        styles.chip,
-                        glassType === type && styles.chipSelected,
-                      ]}
-                      onPress={() => setGlassType(type)}
-                      activeOpacity={0.7}
-                    >
-                      <Text
+                  {Object.values(GlassType).map((type) => {
+                    const isSelected = selectedGlassTypes.includes(type);
+                    return (
+                      <TouchableOpacity
+                        key={type}
                         style={[
-                          styles.chipText,
-                          glassType === type && styles.chipTextSelected,
+                          styles.chip,
+                          isSelected && styles.chipSelected,
                         ]}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          if (isSelected) {
+                            // Remove from selection
+                            setSelectedGlassTypes(selectedGlassTypes.filter(t => t !== type));
+                          } else {
+                            // Add to selection
+                            setSelectedGlassTypes([...selectedGlassTypes, type]);
+                          }
+                        }}
+                        activeOpacity={0.7}
                       >
-                        {type.replace('_', ' ')}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <Text
+                          style={[
+                            styles.chipText,
+                            isSelected && styles.chipTextSelected,
+                          ]}
+                        >
+                          {type.replace(/_/g, ' ')}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
+                <Text style={styles.helperText}>
+                  Example: Double Pane + Double Strength + Neat+
+                </Text>
               </View>
 
               {/* PRICING OPTIONS */}
               <View style={styles.pricingSection}>
                 <Text style={styles.pricingSectionTitle}>💰 Pricing Options</Text>
 
-                {/* Pane Count */}
-                <View style={styles.compactInputGroup}>
-                  <Text style={styles.label}>Pane Count *</Text>
-                  <View style={styles.chipContainer}>
-                    <TouchableOpacity
-                      style={[styles.chip, paneCount === 'SINGLE' && styles.chipSelected]}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setPaneCount('SINGLE');
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.chipText, paneCount === 'SINGLE' && styles.chipTextSelected]}>
-                        Single
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.chip, paneCount === 'DOUBLE' && styles.chipSelected]}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setPaneCount('DOUBLE');
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.chipText, paneCount === 'DOUBLE' && styles.chipTextSelected]}>
-                        Double
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.chip, paneCount === 'TRIPLE' && styles.chipSelected]}
-                      onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                        setPaneCount('TRIPLE');
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.chipText, paneCount === 'TRIPLE' && styles.chipTextSelected]}>
-                        Triple
-                      </Text>
-                    </TouchableOpacity>
+                {/* Pane Count - Only for GLASS category */}
+                {selectedCategory === 'GLASS' && (
+                  <View style={styles.compactInputGroup}>
+                    <Text style={styles.label}>Pane Count *</Text>
+                    <View style={styles.chipContainer}>
+                      <TouchableOpacity
+                        style={[styles.chip, paneCount === 'SINGLE' && styles.chipSelected]}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setPaneCount('SINGLE');
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.chipText, paneCount === 'SINGLE' && styles.chipTextSelected]}>
+                          Single
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.chip, paneCount === 'DOUBLE' && styles.chipSelected]}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setPaneCount('DOUBLE');
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.chipText, paneCount === 'DOUBLE' && styles.chipTextSelected]}>
+                          Double
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.chip, paneCount === 'TRIPLE' && styles.chipSelected]}
+                        onPress={() => {
+                          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          setPaneCount('TRIPLE');
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.chipText, paneCount === 'TRIPLE' && styles.chipTextSelected]}>
+                          Triple
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
+                )}
 
                 {/* Glass Strength */}
                 <View style={styles.compactInputGroup}>
@@ -1059,6 +1094,12 @@ const styles = StyleSheet.create({
   chipTextSelected: {
     color: Colors.background,
     fontWeight: '600',
+  },
+  helperText: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 6,
+    fontStyle: 'italic',
   },
   formButtons: {
     flexDirection: 'row',
