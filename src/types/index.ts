@@ -21,9 +21,20 @@ export interface Measurement {
   depth?: number; // in inches (for frames, etc.)
   quantity: number;
   productType: ProductType;
-  glassType?: GlassType;
+  glassTypes: GlassType[]; // Allow multiple selections (e.g., Double Pane + Double Strength + Neat+)
   frameType?: FrameType;
   hingePlacement?: 'LEFT' | 'RIGHT'; // For casement windows (viewed from exterior)
+  // Pricing options (toggles)
+  hasTempered: boolean;
+  hasLaminate: boolean;
+  hasTinted: boolean;
+  hasGrids: boolean;
+  gridPattern?: string;
+  hasInstallation: boolean;
+  customPrice?: number; // Optional price override
+  // Door-specific
+  sidelightCount?: number;
+  sidelightType?: 'FULL' | 'HALF' | 'NONE';
   notes?: string;
   bluetoothDeviceId?: string;
   measuredAt: Date;
@@ -40,17 +51,17 @@ export enum ProductType {
 }
 
 export enum GlassType {
+  // Pane Count
   SINGLE_PANE = 'SINGLE_PANE',
   DOUBLE_PANE = 'DOUBLE_PANE',
   TRIPLE_PANE = 'TRIPLE_PANE',
-  TEMPERED = 'TEMPERED',
-  LAMINATED = 'LAMINATED',
-  NEAT_PLUS = 'NEAT_PLUS',
-  OFF_SET = 'OFF_SET',
+  // Glass Strength
   SINGLE_STRENGTH = 'SINGLE_STRENGTH',
   DOUBLE_STRENGTH = 'DOUBLE_STRENGTH',
   TRIPLE_STRENGTH = 'TRIPLE_STRENGTH',
-  TINTED = 'TINTED',
+  // Special Glass Types
+  NEAT_PLUS = 'NEAT_PLUS',
+  OFF_SET = 'OFF_SET',
 }
 
 export enum FrameType {
