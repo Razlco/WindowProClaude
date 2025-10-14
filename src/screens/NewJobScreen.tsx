@@ -17,7 +17,7 @@ import { Customer } from '../types';
 import { generateCustomerId } from '../utils';
 
 const NewJobScreen = ({ navigation, route }: any) => {
-  const { measurements = [], jobData = null } = route.params || {};
+  const { measurements = [], jobData = null, category = null } = route.params || {};
 
   const [customerData, setCustomerData] = useState<Partial<Customer>>({
     name: jobData?.customer?.name || '',
@@ -89,6 +89,7 @@ const NewJobScreen = ({ navigation, route }: any) => {
       customer,
       measurements,
       jobId: jobData?.id,
+      category, // Pass category forward so MeasurementsScreen doesn't ask again
     });
   };
 

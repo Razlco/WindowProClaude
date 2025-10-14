@@ -35,14 +35,21 @@ import { MeasurementCard } from '../components';
 import { useJobStorage } from '../hooks';
 
 const MeasurementsScreen = ({ navigation, route }: any) => {
-  const { customer, measurements: initialMeasurements = [], jobId } = route.params || {};
+  const { customer, measurements: initialMeasurements = [], jobId, category } = route.params || {};
   const { saveJob, jobs } = useJobStorage();
 
   const [measurements, setMeasurements] = useState<Measurement[]>(initialMeasurements);
   const [showForm, setShowForm] = useState(false);
-  const [showCategorySelection, setShowCategorySelection] = useState(measurements.length === 0);
+  const [showCategorySelection, setShowCategorySelection] = useState(!category && measurements.length === 0);
   const [selectedCategory, setSelectedCategory] = useState<'WINDOW' | 'DOOR' | 'GLASS' | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Auto-select category if provided from navigation
+  React.useEffect(() => {
+    if (category && !selectedCategory) {
+      handleCategorySelect(category);
+    }
+  }, [category]);
 
   // Form state for new measurement
   const [width, setWidth] = useState('');
@@ -266,7 +273,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
           onPress: () => {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'Tabs' }],
+              routes: [{ name: 'HomeMain' }],
             });
           },
         },
