@@ -11,6 +11,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Switch,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -43,6 +45,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
   const [showCategorySelection, setShowCategorySelection] = useState(!category && measurements.length === 0);
   const [selectedCategory, setSelectedCategory] = useState<'WINDOW' | 'DOOR' | 'GLASS' | null>(null);
   const [saving, setSaving] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   // Form state for new measurement
   const [width, setWidth] = useState('');
@@ -55,13 +58,13 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     GlassType.DOUBLE_PANE,
     GlassType.DOUBLE_STRENGTH
   ]);
-  const [frameType, setFrameType] = useState<FrameType | undefined>(undefined);
+  const [frameType, setFrameType] = useState<FrameType | undefined>(FrameType.VINYL);
   const [hingePlacement, setHingePlacement] = useState<'LEFT' | 'RIGHT' | undefined>(undefined);
   const [notes, setNotes] = useState('');
 
   // Pricing options state
   const [paneCount, setPaneCount] = useState<'SINGLE' | 'DOUBLE' | 'TRIPLE'>('DOUBLE');
-  const [glassStrength, setGlassStrength] = useState<'SINGLE' | 'DOUBLE' | 'TRIPLE'>('SINGLE');
+  const [glassStrength, setGlassStrength] = useState<'SINGLE' | 'DOUBLE' | 'TRIPLE'>('DOUBLE');
   const [hasLaminate, setHasLaminate] = useState(false);
   const [hasTempered, setHasTempered] = useState(false);
   const [hasTinted, setHasTinted] = useState(false);
@@ -82,10 +85,10 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
 
     // Set default product type based on category
     if (category === 'WINDOW') {
-      setProductType(ProductType.DOUBLE_HUNG);
+      setProductType(ProductType.SINGLE_HUNG);
     } else if (category === 'DOOR') {
       // For now, we'll keep using window types since we don't have door types yet
-      setProductType(ProductType.DOUBLE_HUNG);
+      setProductType(ProductType.SINGLE_HUNG);
     } else {
       // GLASS category
       setProductType(ProductType.PICTURE);
@@ -99,6 +102,23 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     }
   }, [category, selectedCategory]);
 
+  // Keyboard listeners
+  React.useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => setKeyboardVisible(true)
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => setKeyboardVisible(false)
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
+
   const resetForm = () => {
     setWidth('');
     setHeight('');
@@ -107,12 +127,12 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     setLocation('');
     setProductType(DEFAULT_MEASUREMENT.productType);
     setSelectedGlassTypes([GlassType.DOUBLE_PANE, GlassType.DOUBLE_STRENGTH]);
-    setFrameType(undefined);
+    setFrameType(FrameType.VINYL);
     setHingePlacement(undefined);
     setNotes('');
     // Reset pricing options
     setPaneCount('DOUBLE');
-    setGlassStrength('SINGLE');
+    setGlassStrength('DOUBLE');
     setHasLaminate(false);
     setHasTempered(false);
     setHasTinted(false);
@@ -322,7 +342,8 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoid}
       >
-        <ScrollView style={styles.scrollView}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView style={styles.scrollView} keyboardShouldPersistTaps="handled">
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Customer</Text>
           <Text style={styles.customerName}>{customer.name}</Text>
@@ -607,7 +628,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
 
                 {/* Glass Strength */}
                 <View style={styles.compactInputGroup}>
-                  <Text style={styles.label}>Glass Strength *</Text>
+                  <Text style={styles.label}>Glass Strength</Text>
                   <View style={styles.chipContainer}>
                     <TouchableOpacity
                       style={[styles.chip, glassStrength === 'SINGLE' && styles.chipSelected]}
@@ -938,6 +959,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
 
       {measurements.length > 0 && !showForm && (
@@ -951,6 +973,19 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
             <Text style={styles.saveButtonText}>
               {saving ? 'Saving...' : 'Save Job'}
             </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Keyboard Dismiss Button */}
+      {keyboardVisible && (
+        <View style={styles.keyboardDismissContainer}>
+          <TouchableOpacity
+            style={styles.keyboardDismissButton}
+            onPress={() => Keyboard.dismiss()}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.keyboardDismissText}>✓ Done</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -1355,6 +1390,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.text,
     padding: 12,
+  },
+  keyboardDismissContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.background,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  keyboardDismissButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  keyboardDismissText: {
+    color: Colors.background,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
