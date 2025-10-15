@@ -20,6 +20,7 @@ export interface Measurement {
   height: number; // in inches
   depth?: number; // in inches (for frames, etc.)
   quantity: number;
+  location?: string; // Room or location (e.g., "Living Room", "Master Bedroom")
   productType: ProductType;
   glassTypes: GlassType[]; // Allow multiple selections (e.g., Double Pane + Double Strength + Neat+)
   frameType?: FrameType;

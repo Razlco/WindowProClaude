@@ -44,18 +44,12 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
   const [selectedCategory, setSelectedCategory] = useState<'WINDOW' | 'DOOR' | 'GLASS' | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Auto-select category if provided from navigation
-  React.useEffect(() => {
-    if (category && !selectedCategory) {
-      handleCategorySelect(category);
-    }
-  }, [category]);
-
   // Form state for new measurement
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
   const [depth, setDepth] = useState('');
   const [quantity, setQuantity] = useState('1');
+  const [location, setLocation] = useState('');
   const [productType, setProductType] = useState<ProductType>(DEFAULT_MEASUREMENT.productType);
   const [selectedGlassTypes, setSelectedGlassTypes] = useState<GlassType[]>([
     GlassType.DOUBLE_PANE,
@@ -80,11 +74,37 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
   const [sidelightCount, setSidelightCount] = useState('0');
   const [sidelightType, setSidelightType] = useState<'FULL' | 'HALF' | 'NONE'>('FULL');
 
+  const handleCategorySelect = (category: 'WINDOW' | 'DOOR' | 'GLASS') => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedCategory(category);
+    setShowCategorySelection(false);
+    setShowForm(true);
+
+    // Set default product type based on category
+    if (category === 'WINDOW') {
+      setProductType(ProductType.DOUBLE_HUNG);
+    } else if (category === 'DOOR') {
+      // For now, we'll keep using window types since we don't have door types yet
+      setProductType(ProductType.DOUBLE_HUNG);
+    } else {
+      // GLASS category
+      setProductType(ProductType.PICTURE);
+    }
+  };
+
+  // Auto-select category if provided from navigation
+  React.useEffect(() => {
+    if (category && !selectedCategory) {
+      handleCategorySelect(category);
+    }
+  }, [category, selectedCategory]);
+
   const resetForm = () => {
     setWidth('');
     setHeight('');
     setDepth('');
     setQuantity('1');
+    setLocation('');
     setProductType(DEFAULT_MEASUREMENT.productType);
     setSelectedGlassTypes([GlassType.DOUBLE_PANE, GlassType.DOUBLE_STRENGTH]);
     setFrameType(undefined);
@@ -102,24 +122,6 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
     setCustomPrice('');
     setSidelightCount('0');
     setSidelightType('FULL');
-  };
-
-  const handleCategorySelect = (category: 'WINDOW' | 'DOOR' | 'GLASS') => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setSelectedCategory(category);
-    setShowCategorySelection(false);
-    setShowForm(true);
-
-    // Set default product type based on category
-    if (category === 'WINDOW') {
-      setProductType(ProductType.DOUBLE_HUNG);
-    } else if (category === 'DOOR') {
-      // For now, we'll keep using window types since we don't have door types yet
-      setProductType(ProductType.DOUBLE_HUNG);
-    } else {
-      // GLASS category
-      setProductType(ProductType.PICTURE);
-    }
   };
 
   const getProductTypeOptions = (): ProductType[] => {
@@ -207,6 +209,7 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
       height: heightNum,
       depth: depth ? parseFloat(depth) : undefined,
       quantity: quantityNum,
+      location: location.trim() || undefined,
       productType,
       glassTypes: selectedGlassTypes,
       frameType,
@@ -469,6 +472,17 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                     keyboardType="number-pad"
                   />
                 </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Location / Room</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g., Living Room, Master Bedroom, Kitchen"
+                  value={location}
+                  onChangeText={setLocation}
+                  autoCapitalize="words"
+                />
               </View>
 
               <View style={styles.inputGroup}>
