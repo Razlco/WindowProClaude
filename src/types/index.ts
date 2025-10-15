@@ -69,7 +69,6 @@ export enum FrameType {
   WOOD = 'WOOD',
   ALUMINUM = 'ALUMINUM',
   FIBERGLASS = 'FIBERGLASS',
-  COMPOSITE = 'COMPOSITE',
 }
 
 export enum JobStatus {
