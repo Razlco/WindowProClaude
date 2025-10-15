@@ -77,6 +77,9 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
   const [sidelightCount, setSidelightCount] = useState('0');
   const [sidelightType, setSidelightType] = useState<'FULL' | 'HALF' | 'NONE'>('FULL');
 
+  // Edit mode
+  const [editingMeasurementId, setEditingMeasurementId] = useState<string | null>(null);
+
   const handleCategorySelect = (category: 'WINDOW' | 'DOOR' | 'GLASS') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setSelectedCategory(category);
@@ -185,7 +188,39 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
       return;
     }
 
-    // Check if tempered glass should be suggested based on size
+    // Check if we're in edit mode
+    if (editingMeasurementId) {
+      // If editing, check tempered requirement and update
+      const shouldSuggestTempered = checkTemperedGlassRequirement(widthNum, heightNum);
+      if (shouldSuggestTempered && !hasTempered) {
+        const squareFeet = ((widthNum * heightNum) / 144).toFixed(1);
+        Alert.alert(
+          'Building Code Notice',
+          `This glass is ${squareFeet} sq ft, which is 9 sq ft or larger.\n\nBuilding codes typically require tempered glass for:\n• Glass 9+ sq ft\n• Within 18" of the floor\n• Within 36" of a walkway\n\nWould you like to enable tempered glass?`,
+          [
+            {
+              text: 'No, Keep Current',
+              style: 'cancel',
+              onPress: () => {
+                handleUpdateMeasurement(widthNum, heightNum, quantityNum);
+              },
+            },
+            {
+              text: 'Yes, Use Tempered',
+              onPress: () => {
+                setHasTempered(true);
+                handleUpdateMeasurement(widthNum, heightNum, quantityNum, true);
+              },
+            },
+          ]
+        );
+      } else {
+        handleUpdateMeasurement(widthNum, heightNum, quantityNum);
+      }
+      return;
+    }
+
+    // Check if tempered glass should be suggested based on size (for new measurements)
     const shouldSuggestTempered = checkTemperedGlassRequirement(widthNum, heightNum);
 
     if (shouldSuggestTempered && !hasTempered) {
@@ -269,6 +304,78 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
         },
       ]
     );
+  };
+
+  const handleEditMeasurement = (measurementId: string) => {
+    const measurement = measurements.find((m) => m.id === measurementId);
+    if (!measurement) return;
+
+    // Populate form with measurement data
+    setWidth(measurement.width.toString());
+    setHeight(measurement.height.toString());
+    setDepth(measurement.depth?.toString() || '');
+    setQuantity(measurement.quantity.toString());
+    setLocation(measurement.location || '');
+    setProductType(measurement.productType);
+    setSelectedGlassTypes(measurement.glassTypes);
+    setFrameType(measurement.frameType);
+    setHingePlacement(measurement.hingePlacement);
+    setHasTempered(measurement.hasTempered);
+    setHasLaminate(measurement.hasLaminate);
+    setHasTinted(measurement.hasTinted);
+    setHasGrids(measurement.hasGrids);
+    setGridPattern(measurement.gridPattern || '');
+    setHasInstallation(measurement.hasInstallation);
+    setCustomPrice(measurement.customPrice?.toString() || '');
+    setSidelightCount(measurement.sidelightCount?.toString() || '0');
+    setSidelightType(measurement.sidelightType || 'FULL');
+    setNotes(measurement.notes || '');
+
+    // Set edit mode
+    setEditingMeasurementId(measurementId);
+    setShowForm(true);
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
+  const handleUpdateMeasurement = (
+    widthNum: number,
+    heightNum: number,
+    quantityNum: number,
+    overrideTempered?: boolean
+  ) => {
+    if (!editingMeasurementId) return;
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    const updatedMeasurement: Measurement = {
+      id: editingMeasurementId,
+      width: widthNum,
+      height: heightNum,
+      depth: depth ? parseFloat(depth) : undefined,
+      quantity: quantityNum,
+      location: location.trim() || undefined,
+      productType,
+      glassTypes: selectedGlassTypes,
+      frameType,
+      hingePlacement,
+      hasTempered: overrideTempered !== undefined ? overrideTempered : hasTempered,
+      hasLaminate,
+      hasTinted,
+      hasGrids,
+      gridPattern: hasGrids ? gridPattern : undefined,
+      hasInstallation,
+      customPrice: customPrice ? parseFloat(customPrice) : undefined,
+      sidelightCount: selectedCategory === 'DOOR' ? parseInt(sidelightCount) : undefined,
+      sidelightType: selectedCategory === 'DOOR' ? sidelightType : undefined,
+      notes: notes.trim() || undefined,
+      measuredAt: new Date(),
+    };
+
+    setMeasurements(measurements.map((m) => (m.id === editingMeasurementId ? updatedMeasurement : m)));
+    setEditingMeasurementId(null);
+    resetForm();
+    setShowForm(false);
   };
 
   const handleSaveJob = async () => {
@@ -414,19 +521,30 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
           {measurements.map((measurement) => (
             <View key={measurement.id} style={styles.measurementWrapper}>
               <MeasurementCard measurement={measurement} />
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => handleRemoveMeasurement(measurement.id)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.removeButtonText}>Remove</Text>
-              </TouchableOpacity>
+              <View style={styles.measurementActions}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => handleEditMeasurement(measurement.id)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.editButtonText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => handleRemoveMeasurement(measurement.id)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.removeButtonText}>Remove</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
 
           {showForm && (
             <View style={styles.form}>
-              <Text style={styles.formTitle}>New Measurement</Text>
+              <Text style={styles.formTitle}>
+                {editingMeasurementId ? 'Edit Measurement' : 'New Measurement'}
+              </Text>
 
               <View style={styles.row}>
                 <View style={[styles.inputGroup, styles.flex1]}>
@@ -950,7 +1068,9 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
                   onPress={handleAddMeasurement}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.addMeasurementButtonText}>Add Measurement</Text>
+                  <Text style={styles.addMeasurementButtonText}>
+                    {editingMeasurementId ? 'Update Measurement' : 'Add Measurement'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -1050,6 +1170,11 @@ const styles = StyleSheet.create({
   measurementWrapper: {
     marginBottom: 12,
   },
+  measurementActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+  },
   addButton: {
     backgroundColor: Colors.primary,
     paddingHorizontal: 16,
@@ -1061,11 +1186,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
   },
+  editButton: {
+    flex: 1,
+    backgroundColor: Colors.info,
+    padding: 8,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  editButtonText: {
+    color: Colors.background,
+    fontSize: 14,
+    fontWeight: '600',
+  },
   removeButton: {
+    flex: 1,
     backgroundColor: Colors.error,
     padding: 8,
     borderRadius: 6,
-    marginTop: 8,
     alignItems: 'center',
   },
   removeButtonText: {
