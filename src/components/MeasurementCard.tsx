@@ -23,9 +23,20 @@ export const MeasurementCard: React.FC<MeasurementCardProps> = ({ measurement })
         </Text>
       </View>
 
+      {measurement.location && (
+        <View style={styles.row}>
+          <Text style={styles.label}>Location:</Text>
+          <Text style={styles.value}>{measurement.location}</Text>
+        </View>
+      )}
+
       <View style={styles.row}>
         <Text style={styles.label}>Glass:</Text>
-        <Text style={styles.value}>{measurement.glassType || 'N/A'}</Text>
+        <Text style={styles.value}>
+          {measurement.glassTypes?.length > 0
+            ? measurement.glassTypes.map(gt => gt.replace(/_/g, ' ')).join(', ')
+            : 'N/A'}
+        </Text>
       </View>
 
       {measurement.frameType && (
@@ -39,6 +50,25 @@ export const MeasurementCard: React.FC<MeasurementCardProps> = ({ measurement })
         <Text style={styles.label}>Quantity:</Text>
         <Text style={styles.value}>{measurement.quantity}</Text>
       </View>
+
+      {/* Pricing Options */}
+      {(measurement.hasTempered || measurement.hasLaminate || measurement.hasTinted ||
+        measurement.hasGrids || measurement.hasInstallation) && (
+        <View style={styles.optionsContainer}>
+          <Text style={styles.label}>Options:</Text>
+          <View style={styles.optionsList}>
+            {measurement.hasTempered && <Text style={styles.option}>• Tempered</Text>}
+            {measurement.hasLaminate && <Text style={styles.option}>• Laminate</Text>}
+            {measurement.hasTinted && <Text style={styles.option}>• Tinted</Text>}
+            {measurement.hasGrids && (
+              <Text style={styles.option}>
+                • Grids{measurement.gridPattern ? ` (${measurement.gridPattern})` : ''}
+              </Text>
+            )}
+            {measurement.hasInstallation && <Text style={styles.option}>• Installation</Text>}
+          </View>
+        </View>
+      )}
 
       {measurement.notes && (
         <View style={styles.notesContainer}>
@@ -82,5 +112,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.text,
     marginTop: 4,
+  },
+  optionsContainer: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  optionsList: {
+    marginTop: 4,
+  },
+  option: {
+    fontSize: 13,
+    color: Colors.text,
+    marginBottom: 2,
   },
 });
