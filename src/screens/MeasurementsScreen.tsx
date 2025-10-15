@@ -415,17 +415,28 @@ const MeasurementsScreen = ({ navigation, route }: any) => {
       await saveJob(newJob);
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Success', 'Job saved successfully!', [
-        {
-          text: 'OK',
-          onPress: () => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'HomeMain' }],
-            });
+      Alert.alert(
+        'Success',
+        'Job saved successfully! Would you like to view the estimate and create a PDF?',
+        [
+          {
+            text: 'Go to Home',
+            style: 'cancel',
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'HomeMain' }],
+              });
+            },
           },
-        },
-      ]);
+          {
+            text: 'View Estimate',
+            onPress: () => {
+              navigation.navigate('EstimatePreview', { job: newJob });
+            },
+          },
+        ]
+      );
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Error', 'Failed to save job. Please try again.');
