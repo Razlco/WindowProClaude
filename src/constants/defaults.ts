@@ -44,8 +44,13 @@ export const MEASUREMENT_LIMITS = {
 // Default values for new measurements
 export const DEFAULT_MEASUREMENT = {
   productType: ProductType.DOUBLE_HUNG,
-  glassType: GlassType.DOUBLE_PANE,
+  glassTypes: [GlassType.DOUBLE_PANE, GlassType.DOUBLE_STRENGTH],
   quantity: 1,
+  hasTempered: false,
+  hasLaminate: false,
+  hasTinted: false,
+  hasGrids: false,
+  hasInstallation: false,
 };
 
 // Bluetooth connection settings
